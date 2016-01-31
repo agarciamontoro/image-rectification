@@ -1,2 +1,2 @@
-# rectifying-algorithm
-Implementation of the Image rectification algorithm by Loop&amp;Zhang
+# Image rectification
+Implementation of the Loop&amp;Zhang image rectification algorithm.
