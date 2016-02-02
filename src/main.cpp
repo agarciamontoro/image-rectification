@@ -10,8 +10,7 @@ bool choleskyDecomp(Mat A, Mat &D){
     double* data = A.ptr<double>();
     int size = A.cols;
 
-    if (hal::Cholesky(data, astep, size, 0, 0, 0))
-    {
+    if ( Cholesky(data, astep, size, 0, 0, 0) ){
         astep /= sizeof(data[0]);
         for (int i = 0; i < size; ++i){
             data[i*astep + i] = (double)(1./data[i*astep + i]);
