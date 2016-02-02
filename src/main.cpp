@@ -30,9 +30,23 @@ int main(){
     cout << "B = " << B << endl;
     Vec3d z = getInitialGuess(A, B, Ap, Bp);
 
+    cout << "z = " << z << endl;
+
+    Mat w = e_x * Mat(z);
+    Mat wp = fund_mat * Mat(z);
+
+    Mat H_p = Mat::eye(3, 3, CV_64F);
+
+    H_p.at<double>(2,0) = w.at<double>(0,0);
+    H_p.at<double>(2,1) = w.at<double>(0,1);
+    cout << "H_p = " << H_p << endl;
 
     draw(img_1, "1");
-    draw(img_2, "2");
+
+    Mat img_1_dst = Mat::zeros(1024,1024,CV_64F);
+    warpPerspective( img_1, img_1_dst, H_p, Size(1024,1024) );
+
+    draw(img_1_dst, "AKLSJDLKAJSDLASD");
 
     waitKey();
 
