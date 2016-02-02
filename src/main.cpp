@@ -9,8 +9,11 @@ using namespace cv;
 using namespace std;
 
 int main(){
-    Mat img_1 = imread("img/Vmort1.pgm");
-    Mat img_2 = imread("img/Vmort2.pgm");
+    // Mat img_1 = imread("img/Vmort1.pgm");
+    // Mat img_2 = imread("img/Vmort2.pgm");
+
+    Mat img_1 = imread("img/monitogo.png");
+    Mat img_2 = imread("img/monitogo2.png");
 
     cout << img_1.cols << " " << img_1.rows << endl;
 
