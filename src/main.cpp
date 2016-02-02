@@ -36,17 +36,27 @@ int main(){
     Mat wp = fund_mat * Mat(z);
 
     Mat H_p = Mat::eye(3, 3, CV_64F);
-
     H_p.at<double>(2,0) = w.at<double>(0,0);
     H_p.at<double>(2,1) = w.at<double>(0,1);
+
+    Mat Hp_p = Mat::eye(3, 3, CV_64F);
+    Hp_p.at<double>(2,0) = wp.at<double>(0,0);
+    Hp_p.at<double>(2,1) = wp.at<double>(0,1);
+
     cout << "H_p = " << H_p << endl;
+    cout << "Hp_p = " << Hp_p << endl;
+
+    Mat img_1_dst = Mat::zeros(512,512,CV_64F);
+    Mat img_2_dst = Mat::zeros(512,512,CV_64F);
+
+    warpPerspective( img_1, img_1_dst, H_p, img_1.size() );
+    warpPerspective( img_2, img_2_dst, Hp_p, img_2.size() );
 
     draw(img_1, "1");
+    draw(img_1_dst, "1 proyectada");
 
-    Mat img_1_dst = Mat::zeros(1024,1024,CV_64F);
-    warpPerspective( img_1, img_1_dst, H_p, Size(1024,1024) );
-
-    draw(img_1_dst, "AKLSJDLKAJSDLASD");
+    draw(img_2, "2");
+    draw(img_2_dst, "2 proyectada");
 
     waitKey();
 

@@ -44,7 +44,7 @@ float computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole
         Vec3d line_2 = lines_2[i];
 
         // Draws only num_lines lines
-        if(i % (lines_1.size()/num_lines) == 0 ){
+        if(true){//i % (lines_1.size()/num_lines) == 0 ){
             Scalar color(rng.uniform(0, 255),
                          rng.uniform(0, 255),
                          rng.uniform(0, 255));
@@ -101,7 +101,7 @@ Mat fundamentalMat(Mat &one, Mat &other,
     pair<vector<Point2f>, vector<Point2f> > matches;
     Mat F;
 
-    matches = match(one, other, descriptor_id::BRUTE_FORCE, detector_id::ORB);
+    matches = match(one, other, descriptor_id::BRUTE_FORCE, detector_id::BRISK);
 
     vector<unsigned char> mask;
     F = findFundamentalMat(matches.first, matches.second,
@@ -186,9 +186,9 @@ Mat detectFeatures(Mat image, enum detector_id det_id, vector<KeyPoint> &keypoin
     else{
         // Declare BRISK and BRISK detectors
         detector = BRISK::create(
-            55,   // thresh = 30
-    		8,    // octaves = 3
-    		1.5f  // patternScale = 1.0f
+            30,   // thresh = 30
+    		3,    // octaves = 3
+    		1.0f  // patternScale = 1.0f
         );
     }
 
@@ -297,12 +297,17 @@ Vec3d maximize(Mat &A, Mat &B){
         return Vec3d(sol.at<double>(0,0), sol.at<double>(0,1), sol.at<double>(0,2));
     }
 
+    cout << "ERROR WARNING CUIDADO EEEEYDONDECOÑOVAS" << endl;
+
     return Vec3d(0, 0, 0);
 }
 
 Vec3d getInitialGuess(Mat &A, Mat &B, Mat &Ap, Mat &Bp){
     Vec3d z_1 = maximize(A, B);
     Vec3d z_2 = maximize(Ap, Bp);
+
+    cout << "Z_1: " << z_1 << endl <<"Normalizado: " << normalize(z_1) << endl;
+    cout << "Z_2: " << z_2 << endl <<"Normalizado: " << normalize(z_2) << endl;
 
     return (normalize(z_1) + normalize(z_2))/2;
 }
