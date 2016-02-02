@@ -26,7 +26,10 @@ int main(){
     obtainAB(img_1, e_x, A, B);
     obtainAB(img_2, fund_mat, Ap, Bp);
 
+    cout << "A = " << A << endl;
+    cout << "B = " << B << endl;
     Vec3d z = getInitialGuess(A, B, Ap, Bp);
+
 
     draw(img_1, "1");
     draw(img_2, "2");

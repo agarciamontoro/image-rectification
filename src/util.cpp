@@ -247,7 +247,7 @@ void obtainAB(const Mat &img, const Mat &mult_mat, Mat &A, Mat &B){
     PPt.at<double>(0,0) = width*width - 1;
     PPt.at<double>(1,1) = height*height - 1;
 
-    PPt *= (width*height);// / 12;
+    PPt *= (width*height) / 12.0;
 
     cout << PPt << endl << endl;
 
@@ -263,7 +263,6 @@ void obtainAB(const Mat &img, const Mat &mult_mat, Mat &A, Mat &B){
     Mat pcpct(size, size, CV_64F, values);
 
     pcpct /= 4;
-
     A = mult_mat.t() * PPt * mult_mat;
     B = mult_mat.t() * pcpct * mult_mat;
 }
@@ -282,7 +281,7 @@ Mat crossProductMatrix(Vec3d elem){
 
 Vec3d maximize(Mat &A, Mat &B){
     Mat D;
-    if(  choleskyDecomp(A, D) ){
+    if( choleskyDecomp(A, D) ){
         Mat D_inv = D.inv();
 
         Mat DBD = D_inv.t() * B * D_inv;
@@ -292,7 +291,8 @@ Vec3d maximize(Mat &A, Mat &B){
         SVD::compute( DBD, sing_values, l_sing_vectors, r_sing_vectors, 0 );
 
         Mat y = r_sing_vectors.row(r_sing_vectors.rows-1);
-        Mat sol = D_inv*y;
+
+        Mat sol = D_inv*y.t();
 
         return Vec3d(sol.at<double>(0,0), sol.at<double>(0,1), sol.at<double>(0,2));
     }
