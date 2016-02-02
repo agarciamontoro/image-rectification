@@ -1,22 +1,8 @@
 #include "util.hpp"
 
 Vec3d lineIntersection(Vec3d one, Vec3d other){
-    double coeffs_values[2][2] = {
-        {one[0], one[1]},
-        {other[0], other[1]}
-    };
-
-    double free_values[2][1] = {
-        {-one[2]},
-        {-other[2]}
-    };
-
-    Mat coeffs(2, 2, CV_64F, coeffs_values);
-    Mat free_terms(2, 1, CV_64F, free_values);
-
-    Mat sol = coeffs.inv() * free_terms;
-
-    return Vec3d(sol.at<double>(0, 0), sol.at<double>(0, 1), 1);
+  // Wikipedia info Line-line intersection
+    return one.cross(other);
 }
 
 float computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole1, Vec3d &epipole2, Mat &fund_mat){
@@ -88,8 +74,8 @@ float computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole
      }
 
      // Obtain epipole
-     epipole1 = lineIntersection(lines_1[0], lines_1[1]);
-     epipole2 = lineIntersection(lines_2[0], lines_2[1]);
+     epipole2 = lineIntersection(lines_1[0], lines_1[1]);
+     epipole1 = lineIntersection(lines_2[0], lines_2[1]);
 
      return (distance_1+distance_2)/(2*lines_1.size());
 }
