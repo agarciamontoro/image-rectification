@@ -22,7 +22,7 @@ enum descriptor_id{
     FLANN_BASE
 };
 
-float computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole1, Vec3d &epipole2);
+float computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole1, Vec3d &epipole2, Mat &fund_mat);
 
 Mat fundamentalMat(Mat &one, Mat &other, vector<Point2d> &good_matches_1, vector<Point2d> &good_matches_2);
 
@@ -32,6 +32,14 @@ Mat detectFeatures(Mat image, enum detector_id det_id, vector<KeyPoint> &keypoin
 
 void draw(Mat img, string name);
 
-bool choleskyDecomp(Mat A, Mat &D);
+bool choleskyDecomp(Mat &A, Mat &D);
+
+void obtainAB(const Mat &img, const Mat &mult_mat, Mat &A, Mat &B);
+
+Mat crossProductMatrix(Vec3d elem);
+
+Vec3d maximize(Mat &A, Mat &B);
+
+Vec3d getInitialGuess(Mat &A, Mat &B, Mat &Ap, Mat &Bp);
 
 #endif

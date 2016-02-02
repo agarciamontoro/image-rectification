@@ -19,11 +19,11 @@ Vec3d lineIntersection(Vec3d one, Vec3d other){
     return Vec3d(sol.at<double>(0, 0), sol.at<double>(0, 1), 1);
 }
 
-float computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole1, Vec3d &epipole2){
+float computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole1, Vec3d &epipole2, Mat &fund_mat){
     vector<Point2d> good_matches_1;
     vector<Point2d> good_matches_2;
 
-    Mat fund_mat = fundamentalMat(one, other, good_matches_1, good_matches_2);
+    fund_mat = fundamentalMat(one, other, good_matches_1, good_matches_2);
 
     vector<Vec3d> lines_1, lines_2;
 
@@ -214,7 +214,7 @@ void draw(Mat img, string name){
 }
 
 // https://github.com/Itseez/opencv/blob/master/modules/stitching/src/autocalib.cpp
-bool choleskyDecomp(Mat A, Mat &D){
+bool choleskyDecomp(Mat &A, Mat &D){
     size_t astep = A.step;
     double* data = A.ptr<double>();
     int size = A.cols;
@@ -234,4 +234,75 @@ bool choleskyDecomp(Mat A, Mat &D){
     }
 
     return false;
+}
+
+void obtainAB(const Mat &img, const Mat &mult_mat, Mat &A, Mat &B){
+    int width = img.cols;
+    int height = img.rows;
+
+    int size = 3;
+
+    Mat PPt = Mat::zeros(size, size, CV_64F);
+
+    PPt.at<double>(0,0) = width*width - 1;
+    PPt.at<double>(1,1) = height*height - 1;
+
+    PPt *= (width*height);// / 12;
+
+    cout << PPt << endl << endl;
+
+    double w_1 = width - 1;
+    double h_1 = height - 1;
+
+    double values[3][3] = {
+        {w_1*w_1, w_1*h_1, 2*w_1},
+        {w_1*h_1, h_1*h_1, 2*h_1},
+        {2*w_1, 2*h_1, 4}
+    };
+
+    Mat pcpct(size, size, CV_64F, values);
+
+    pcpct /= 4;
+
+    A = mult_mat.t() * PPt * mult_mat;
+    B = mult_mat.t() * pcpct * mult_mat;
+}
+
+Mat crossProductMatrix(Vec3d elem){
+    double values[3][3] = {
+        {0, -elem[2], elem[1]},
+        {elem[2], 0, -elem[0]},
+        {-elem[1], elem[0], 0}
+    };
+
+    Mat sol(3, 3, CV_64F, values);
+
+    return sol.clone();
+}
+
+Vec3d maximize(Mat &A, Mat &B){
+    Mat D;
+    if(  choleskyDecomp(A, D) ){
+        Mat D_inv = D.inv();
+
+        Mat DBD = D_inv.t() * B * D_inv;
+
+        // Solve the equations system using SVD decomposition
+        Mat sing_values, l_sing_vectors, r_sing_vectors;
+        SVD::compute( DBD, sing_values, l_sing_vectors, r_sing_vectors, 0 );
+
+        Mat y = r_sing_vectors.row(r_sing_vectors.rows-1);
+        Mat sol = D_inv*y;
+
+        return Vec3d(sol.at<double>(0,0), sol.at<double>(0,1), sol.at<double>(0,2));
+    }
+
+    return Vec3d(0, 0, 0);
+}
+
+Vec3d getInitialGuess(Mat &A, Mat &B, Mat &Ap, Mat &Bp){
+    Vec3d z_1 = maximize(A, B);
+    Vec3d z_2 = maximize(Ap, Bp);
+
+    return (normalize(z_1) + normalize(z_2))/2;
 }
