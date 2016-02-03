@@ -24,7 +24,7 @@ enum descriptor_id{
     FLANN_BASE
 };
 
-float computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole1, Vec3d &epipole2, Mat &fund_mat);
+float computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole, Mat &fund_mat);
 
 Mat fundamentalMat(Mat &one, Mat &other, vector<Point2d> &good_matches_1, vector<Point2d> &good_matches_2);
 
@@ -47,10 +47,15 @@ Vec3d getInitialGuess(Mat &A, Mat &B, Mat &Ap, Mat &Bp);
 Mat manualFundMat( vector<Point2d> &good_matches_1,
                     vector<Point2d> &good_matches_2);
 
-double getTranslationTerm(const Mat &img_1, const Mat &img_2, const Mat &H_p, const Mat &Hp_p);
+double getTranslationTerm(const Mat &img_1, const Mat &img_2, const Mat &H_p,
+                          const Mat &Hp_p);
 
 double getMinYCoord(const Mat &img, const Mat &homography);
 
 Mat getS(const Mat &img, const Mat &homography);
+
+void getShearingTransforms(const Mat &img_1, const Mat &img_2,
+                          const Mat &H_1, const Mat &H_2,
+                          Mat &H_s, Mat &Hp_s);
 
 #endif

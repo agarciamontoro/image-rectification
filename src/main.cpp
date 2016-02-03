@@ -10,20 +10,20 @@ using namespace std;
 
 int main(){
     /****************** EPIPOLAR GEOMETRY **************************/
-    // // Mat img_1 = imread("img/Vmort1.pgm");
-    // // Mat img_2 = imread("img/Vmort2.pgm");
+    // Mat img_1 = imread("img/Vmort1.pgm");
+    // Mat img_2 = imread("img/Vmort2.pgm");
 
     Mat img_1 = imread("img/monitogo.png");
     Mat img_2 = imread("img/monitogo2.png");
 
     Mat fund_mat;
 
-    Vec3d epipole1, epipole2;
-    computeAndDrawEpiLines(img_1, img_2, 150, epipole1, epipole2, fund_mat);
+    Vec3d epipole;
+    computeAndDrawEpiLines(img_1, img_2, 150, epipole, fund_mat);
 
     Mat A, B, Ap, Bp;
 
-    Mat e_x = crossProductMatrix(epipole1);
+    Mat e_x = crossProductMatrix(epipole);
 
     /****************** PROJECTIVE **************************/
 
@@ -75,22 +75,23 @@ int main(){
 
     /******************* SHEARING ***************************/
 
-    Mat S = getS(img_1, H_r*H_p);
-    Mat Sp = getS(img_2, Hp_r*Hp_p);
+    Mat H_1 = H_r*H_p;
+    Mat H_2 = Hp_r*Hp_p;
 
-    Mat H_s = getShearingTransform(img_1, img_2, S*H_r*H_p);
-    Mat Hp_s = getShearingTransform(img_1, img_2, Sp*Hp_r*Hp_p);
+    Mat H_s, Hp_s;
+
+    getShearingTransforms(img_1, img_2, H_1, H_2, H_s, Hp_s);
 
     /****************** RECTIFY IMAGES **********************/
 
     cout << "H_p = " << H_p << endl;
     cout << "Hp_p = " << Hp_p << endl;
 
-    Mat img_1_dst = Mat::zeros(512,512,CV_64F);
-    Mat img_2_dst = Mat::zeros(512,512,CV_64F);
+    Mat img_1_dst = Mat::zeros(1024,1024,CV_64F);
+    Mat img_2_dst = Mat::zeros(1024,1024,CV_64F);
 
-    warpPerspective( img_1, img_1_dst, S*H_r*H_p, img_1.size() );
-    warpPerspective( img_2, img_2_dst, Sp*Hp_r*Hp_p, img_2.size() );
+    warpPerspective( img_1, img_1_dst, H_s * H_r * H_p, img_1_dst.size() );
+    warpPerspective( img_2, img_2_dst, Hp_s * Hp_r * Hp_p, img_2_dst.size() );
 
     draw(img_1, "1");
     draw(img_1_dst, "1 proyectada");

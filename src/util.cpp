@@ -5,7 +5,7 @@ Vec3d lineIntersection(Vec3d one, Vec3d other){
     return one.cross(other);
 }
 
-float computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole1, Vec3d &epipole2, Mat &fund_mat){
+float computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole, Mat &fund_mat){
     vector<Point2d> good_matches_1;
     vector<Point2d> good_matches_2;
 
@@ -14,8 +14,8 @@ float computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole
 
     vector<Vec3d> lines_1, lines_2;
 
-    computeCorrespondEpilines(good_matches_1, 1, fund_mat, lines_1);
-    computeCorrespondEpilines(good_matches_2, 2, fund_mat, lines_2);
+    computeCorrespondEpilines(good_matches_1, 1, fund_mat, lines_2);
+    computeCorrespondEpilines(good_matches_2, 2, fund_mat, lines_1);
 
     RNG rng;
     theRNG().state = clock();
@@ -36,7 +36,7 @@ float computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole
                          rng.uniform(0, 255),
                          rng.uniform(0, 255));
 
-            line(other,
+            line(one,
                  Point(0, -line_1[2]/line_1[1]),
                  Point(one.cols, -(line_1[2] + line_1[0]*one.cols)/line_1[1]),
                  color
@@ -47,7 +47,7 @@ float computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole
                     color,
                     CV_FILLED);
 
-            line(one,
+            line(other,
                  Point(0,
                        -line_2[2]/line_2[1]),
                  Point(other.cols,
@@ -74,9 +74,15 @@ float computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole
                       sqrt(line_2[0]*line_2[0] + line_2[1]*line_2[1]);
      }
 
-     // Obtain epipoles
-     epipole2 = lineIntersection(lines_1[0], lines_1[1]);
-     epipole1 = lineIntersection(lines_2[0], lines_2[1]);
+     // The epipole is the left-null vector of F
+     Mat epi_mat;
+     SVD::solveZ(fund_mat, epi_mat);
+
+     epipole[0] = epi_mat.at<double>(0,0);
+     epipole[1] = epi_mat.at<double>(0,1);
+     epipole[2] = epi_mat.at<double>(0,2);
+
+     //epipole /= epipole[2];
 
      return (distance_1+distance_2)/(2*lines_1.size());
 }
@@ -412,4 +418,61 @@ Mat getS(const Mat &img, const Mat &homography){
     S.at<double>(0,1) = coeff_b;
 
     return S;
+}
+
+void getShearingTransforms(const Mat &img_1, const Mat &img_2,
+                           const Mat &H_1, const Mat &H_2,
+                           Mat &H_s, Mat &Hp_s){
+
+    Mat S = getS(img_1, H_1);
+    Mat Sp = getS(img_2, H_2);
+
+    double A = img_1.cols*img_1.rows + img_2.cols*img_2.rows;
+    double Ap = 0;
+
+    vector<Point2f> corners(4), corners_trans(4);
+
+    corners[0] = Point2f(0,0);
+    corners[1] = Point2f(img_1.cols,0);
+    corners[2] = Point2f(img_1.cols,img_1.rows);
+    corners[3] = Point2f(0,img_1.rows);
+
+    perspectiveTransform(corners, corners_trans, S*H_1);
+    Ap += contourArea(corners_trans);
+
+    float min_x_1, min_y_1;
+    min_x_1 = min_y_1 = +INF;
+    for (int j = 0; j < 4; j++) {
+        min_x_1 = min(corners_trans[j].x, min_x_1);
+        min_y_1 = min(corners_trans[j].y, min_y_1);
+    }
+
+    corners[0] = Point2f(0,0);
+    corners[1] = Point2f(img_2.cols,0);
+    corners[2] = Point2f(img_2.cols,img_2.rows);
+    corners[3] = Point2f(0,img_2.rows);
+
+    perspectiveTransform(corners, corners_trans, Sp*H_2);
+    Ap += contourArea(corners_trans);
+
+    float min_x_2, min_y_2;
+    min_x_2 = min_y_2 = +INF;
+    for (int j = 0; j < 4; j++) {
+        min_x_2 = min(corners_trans[j].x, min_x_2);
+        min_y_2 = min(corners_trans[j].y, min_y_2);
+    }
+
+    double scale = sqrt(A/Ap);
+    double min_y = min_y_1 < min_y_2 ? min_y_1 : min_y_2;
+
+    H_s = Mat::eye(3, 3, CV_64F);
+    Hp_s = Mat::eye(3, 3, CV_64F);
+
+    H_s.at<double>(0,0) = H_s.at<double>(1,1) = scale;
+    Hp_s.at<double>(0,0) = Hp_s.at<double>(1,1) = scale;
+
+    H_s.at<double>(0,2) = -min_x_1;
+    Hp_s.at<double>(0,2) = -min_x_2;
+
+    H_s.at<double>(1,2) = Hp_s.at<double>(1,2) = -min_y;
 }
