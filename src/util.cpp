@@ -32,8 +32,8 @@ float computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole
     vector<Point2d> good_matches_1;
     vector<Point2d> good_matches_2;
 
-    fund_mat = fundamentalMat(one, other, good_matches_1, good_matches_2);
-    // fund_mat = manualFundMat(good_matches_1, good_matches_2);
+    // fund_mat = fundamentalMat(one, other, good_matches_1, good_matches_2);
+    fund_mat = manualFundMat(good_matches_1, good_matches_2);
 
     vector<Vec3d> lines_1, lines_2;
 

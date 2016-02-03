@@ -13,11 +13,11 @@ int main(){
     // Mat img_1 = imread("img/Vmort1.pgm");
     // Mat img_2 = imread("img/Vmort2.pgm");
 
-    // Mat img_1 = imread("img/monitogo.png");
-    // Mat img_2 = imread("img/monitogo2.png");
+    Mat img_1 = imread("img/monitogo.png");
+    Mat img_2 = imread("img/monitogo2.png");
 
-    Mat img_1 = imread("/home/antonio/Dropbox/Universidad/Vision por Computador/Foticos/img1.png");
-    Mat img_2 = imread("/home/antonio/Dropbox/Universidad/Vision por Computador/Foticos/img2.png");
+    // Mat img_1 = imread("/home/alejandro/Documentos/Dropbox/Universidad/Vision por Computador/Foticos/img1.png");
+    // Mat img_2 = imread("/home/alejandro/Documentos/Dropbox/Universidad/Vision por Computador/Foticos/img2.png");
 
     Mat fund_mat;
 
@@ -98,11 +98,57 @@ int main(){
     cout << "H_p = " << H_p << endl;
     cout << "Hp_p = " << Hp_p << endl;
 
-    Mat img_1_dst = Mat::zeros(1024,1024,CV_64F);
-    Mat img_2_dst = Mat::zeros(1024,1024,CV_64F);
-
     Mat H = H_s * H_r * H_p;
     Mat Hp = Hp_s * Hp_r * Hp_p;
+
+            // Get homography image of the corner coordinates from all the images to obtain mosaic size
+            vector<Point2f> corners_all(4), corners_all_t(4);
+            float min_x, min_y, max_x, max_y;
+            min_x = min_y = +INF;
+            max_x = max_y = -INF;
+
+            corners_all[0] = Point2f(0,0);
+            corners_all[1] = Point2f(img_1.cols,0);
+            corners_all[2] = Point2f(img_1.cols,img_1.rows);
+            corners_all[3] = Point2f(0,img_1.rows);
+
+            perspectiveTransform(corners_all, corners_all_t, H);
+
+            for (int j = 0; j < 4; j++) {
+                min_x = min(corners_all_t[j].x, min_x);
+                max_x = max(corners_all_t[j].x, max_x);
+
+                min_y = min(corners_all_t[j].y, min_y);
+                max_y = max(corners_all_t[j].y, max_y);
+            }
+
+            int img_1_cols = max_x - min_x;
+            int img_1_rows = max_y - min_y;
+
+            // Get homography image of the corner coordinates from all the images to obtain mosaic size
+            min_x = min_y = +INF;
+            max_x = max_y = -INF;
+
+            corners_all[0] = Point2f(0,0);
+            corners_all[1] = Point2f(img_2.cols,0);
+            corners_all[2] = Point2f(img_2.cols,img_2.rows);
+            corners_all[3] = Point2f(0,img_2.rows);
+
+            perspectiveTransform(corners_all, corners_all_t, Hp);
+
+            for (int j = 0; j < 4; j++) {
+                min_x = min(corners_all_t[j].x, min_x);
+                max_x = max(corners_all_t[j].x, max_x);
+
+                min_y = min(corners_all_t[j].y, min_y);
+                max_y = max(corners_all_t[j].y, max_y);
+            }
+
+            int img_2_cols = max_x - min_x;
+            int img_2_rows = max_y - min_y;
+
+    Mat img_1_dst(img_1_rows+50, img_1_cols+50, CV_64F);
+    Mat img_2_dst(img_2_rows+50, img_2_cols+50, CV_64F);
 
     warpPerspective( img_1, img_1_dst, H, img_1_dst.size() );
     warpPerspective( img_2, img_2_dst, Hp, img_2_dst.size() );
