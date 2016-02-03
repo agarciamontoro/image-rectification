@@ -349,7 +349,16 @@ Mat manualFundMat( vector<Point2d> &good_matches_1,
     return fund_mat;
 }
 
-void getMinimumYcoordinate(img_1, img_2, H_p, Hp_p){
+double getTranslationTerm(const Mat &img_1, const Mat &img_2, const Mat &H_p, const Mat &Hp_p){
+    double min_1 = getMinYCoord(img_1, H_p);
+    double min_2 = getMinYCoord(img_2, Hp_p);
+
+    double offset = min_1 < min_2 ? min_1 : min_2;
+
+    return -offset;
+}
+
+double getMinYCoord(const Mat &img, const Mat &homography){
     vector<Point2f> corners(4), corners_trans(4);
 
     corners[0] = Point2f(0,0);

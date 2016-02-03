@@ -49,7 +49,9 @@ int main(){
 
     /****************** SIMILARITY **************************/
 
-    double vp_c = getMinimumYcoordinate(img_1, img_2, H_p, Hp_p);
+    double vp_c = getTranslationTerm(img_1, img_2, H_p, Hp_p);
+
+    cout << endl << endl << "\t\t\t\t" << vp_c << endl << endl;
 
     /****************** RECTIFY IMAGES **********************/
 

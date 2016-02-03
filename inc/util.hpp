@@ -12,6 +12,8 @@
 using namespace cv;
 using namespace std;
 
+#define INF 2147483647.0
+
 enum detector_id{
     ORB,
     BRISK
@@ -45,6 +47,8 @@ Vec3d getInitialGuess(Mat &A, Mat &B, Mat &Ap, Mat &Bp);
 Mat manualFundMat( vector<Point2d> &good_matches_1,
                     vector<Point2d> &good_matches_2);
 
-void getMinimumYcoordinate(img_1, img_2, H_p, Hp_p);
+double getTranslationTerm(const Mat &img_1, const Mat &img_2, const Mat &H_p, const Mat &Hp_p);
+
+double getMinYCoord(const Mat &img, const Mat &homography);
 
 #endif
