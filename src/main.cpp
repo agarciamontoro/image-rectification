@@ -53,6 +53,29 @@ int main(){
 
     cout << endl << endl << "\t\t\t\t" << vp_c << endl << endl;
 
+    Mat H_r = Mat::zeros(3, 3, CV_64F);
+
+    H_r.at<double>(0,0) = fund_mat.at<double>(2,1) - w.at<double>(0,1) * fund_mat.at<double>(2,2);
+    H_r.at<double>(1,0) = fund_mat.at<double>(2,0) -  fund_mat.at<double>(2,2);
+
+    H_r.at<double>(0,1) = w.at<double>(0,0) * fund_mat.at<double>(2,2) - fund_mat.at<double>(2,0);
+    H_r.at<double>(1,1) = H_r.at<double>(0,0);
+
+    H_r.at<double>(1,2) = fund_mat.at<double>(2,2) + vp_c;
+    H_r.at<double>(2,2) = 1.0;
+
+    Mat Hp_r = Mat::zeros(3, 3, CV_64F);
+
+    Hp_r.at<double>(0,0) = wp.at<double>(0,1) * fund_mat.at<double>(2,2) - fund_mat.at<double>(1,2);
+    Hp_r.at<double>(1,0) = wp.at<double>(0,0) * fund_mat.at<double>(2,2) - fund_mat.at<double>(0,2);
+
+    Hp_r.at<double>(0,1) = fund_mat.at<double>(0,2) - wp.at<double>(0,0) * fund_mat.at<double>(2,2);
+    Hp_r.at<double>(1,1) = Hp_r.at<double>(0,0);
+
+    Hp_r.at<double>(1,2) = vp_c;
+    Hp_r.at<double>(2,2) = 1.0;
+
+
     /****************** RECTIFY IMAGES **********************/
 
     cout << "H_p = " << H_p << endl;
