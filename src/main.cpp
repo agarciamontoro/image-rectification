@@ -36,7 +36,6 @@ int main(){
 
     cout << "z = " << z << endl;
 
-
     Mat w = e_x * Mat(z);
     Mat wp = fund_mat * Mat(z);
 
@@ -58,10 +57,12 @@ int main(){
 
     double vp_c = getTranslationTerm(img_1, img_2, H_p, Hp_p);
 
+    cout << "vp_c = " << vp_c << endl;
+
     Mat H_r = Mat::zeros(3, 3, CV_64F);
 
     H_r.at<double>(0,0) = fund_mat.at<double>(2,1) - w.at<double>(1,0) * fund_mat.at<double>(2,2);
-    H_r.at<double>(1,0) = fund_mat.at<double>(2,0) -  fund_mat.at<double>(2,2);
+    H_r.at<double>(1,0) = fund_mat.at<double>(2,0) - w.at<double>(0,0) * fund_mat.at<double>(2,2);
 
     H_r.at<double>(0,1) = w.at<double>(0,0) * fund_mat.at<double>(2,2) - fund_mat.at<double>(2,0);
     H_r.at<double>(1,1) = H_r.at<double>(0,0);
@@ -97,8 +98,8 @@ int main(){
     Mat img_1_dst = Mat::zeros(1024,1024,CV_64F);
     Mat img_2_dst = Mat::zeros(1024,1024,CV_64F);
 
-    Mat H = /*H_s * H_r **/ H_p;
-    Mat Hp = /*Hp_s * Hp_r **/ Hp_p;
+    Mat H = H_s * H_r * H_p;
+    Mat Hp = Hp_s * Hp_r * Hp_p;
 
     warpPerspective( img_1, img_1_dst, H, img_1_dst.size() );
     warpPerspective( img_2, img_2_dst, Hp, img_2_dst.size() );
