@@ -499,16 +499,56 @@ void getShearingTransforms(const Mat &img_1, const Mat &img_2,
     double scale = sqrt(A/Ap);
     double min_y = min_y_1 < min_y_2 ? min_y_1 : min_y_2;
 
-    Mat W = Mat::eye(3, 3, CV_64F);
-    Mat Wp = Mat::eye(3, 3, CV_64F);
+    // We define W2 as the scale transformation and W1 as the translation
+    // transformation. Then, W = W1*W2.
 
-    W.at<double>(0,0) = W.at<double>(1,1) = scale;
-    Wp.at<double>(0,0) = Wp.at<double>(1,1) = scale;
+    Mat W;
+    Mat Wp;
 
-    W.at<double>(0,2) = -min_x_1;
-    Wp.at<double>(0,2) = -min_x_2;
+    Mat W_1 = Mat::eye(3, 3, CV_64F);
+    Mat Wp_1 = Mat::eye(3, 3, CV_64F);
 
-    W.at<double>(1,2) = Wp.at<double>(1,2) = -min_y;
+    Mat W_2 = Mat::eye(3, 3, CV_64F);
+    Mat Wp_2 = Mat::eye(3, 3, CV_64F);
+
+    W_2.at<double>(0,0) = W_2.at<double>(1,1) = scale;
+    Wp_2.at<double>(0,0) = Wp_2.at<double>(1,1) = scale;
+
+            corners[0] = Point2f(0,0);
+            corners[1] = Point2f(img_1.cols,0);
+            corners[2] = Point2f(img_1.cols,img_1.rows);
+            corners[3] = Point2f(0,img_1.rows);
+
+            perspectiveTransform(corners, corners_trans, W_2*S*H_1);
+
+            min_x_1 = min_y_1 = +INF;
+            for (int j = 0; j < 4; j++) {
+                min_x_1 = min(corners_trans[j].x, min_x_1);
+                min_y_1 = min(corners_trans[j].y, min_y_1);
+            }
+
+            corners[0] = Point2f(0,0);
+            corners[1] = Point2f(img_2.cols,0);
+            corners[2] = Point2f(img_2.cols,img_2.rows);
+            corners[3] = Point2f(0,img_2.rows);
+
+            perspectiveTransform(corners, corners_trans, Wp_2*Sp*H_2);
+
+            min_x_2 = min_y_2 = +INF;
+            for (int j = 0; j < 4; j++) {
+                min_x_2 = min(corners_trans[j].x, min_x_2);
+                min_y_2 = min(corners_trans[j].y, min_y_2);
+            }
+
+            min_y = min_y_1 < min_y_2 ? min_y_1 : min_y_2;
+
+    W_1.at<double>(0,2) = -min_x_1;
+    Wp_1.at<double>(0,2) = -min_x_2;
+
+    W_1.at<double>(1,2) = Wp_1.at<double>(1,2) = -min_y;
+
+    W = W_1*W_2;
+    Wp = Wp_1*Wp_2;
 
     H_s = W*S;
     Hp_s = Wp*Sp;

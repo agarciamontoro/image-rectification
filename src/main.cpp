@@ -147,8 +147,8 @@ int main(){
             int img_2_cols = max_x - min_x;
             int img_2_rows = max_y - min_y;
 
-    Mat img_1_dst(img_1_rows+50, img_1_cols+50, CV_64F);
-    Mat img_2_dst(img_2_rows+50, img_2_cols+50, CV_64F);
+    Mat img_1_dst(img_1_rows, img_1_cols, CV_64F);
+    Mat img_2_dst(img_2_rows, img_2_cols, CV_64F);
 
     warpPerspective( img_1, img_1_dst, H, img_1_dst.size() );
     warpPerspective( img_2, img_2_dst, Hp, img_2_dst.size() );
