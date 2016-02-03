@@ -90,8 +90,11 @@ int main(){
     Mat img_1_dst = Mat::zeros(1024,1024,CV_64F);
     Mat img_2_dst = Mat::zeros(1024,1024,CV_64F);
 
-    warpPerspective( img_1, img_1_dst, H_s * H_r * H_p, img_1_dst.size() );
-    warpPerspective( img_2, img_2_dst, Hp_s * Hp_r * Hp_p, img_2_dst.size() );
+    Mat H = /*H_s * H_r **/ H_p;
+    Mat Hp = /*Hp_s * Hp_r **/ Hp_p;
+
+    warpPerspective( img_1, img_1_dst, H, img_1_dst.size() );
+    warpPerspective( img_2, img_2_dst, Hp, img_2_dst.size() );
 
     draw(img_1, "1");
     draw(img_1_dst, "1 proyectada");

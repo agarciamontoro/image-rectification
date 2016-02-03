@@ -82,7 +82,7 @@ float computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole
      epipole[1] = epi_mat.at<double>(0,1);
      epipole[2] = epi_mat.at<double>(0,2);
 
-     //epipole /= epipole[2];
+    //  epipole /= epipole[2];
 
      return (distance_1+distance_2)/(2*lines_1.size());
 }
@@ -242,8 +242,6 @@ void obtainAB(const Mat &img, const Mat &mult_mat, Mat &A, Mat &B){
 
     PPt *= (width*height) / 12.0;
 
-    cout << PPt << endl << endl;
-
     double w_1 = width - 1;
     double h_1 = height - 1;
 
@@ -279,11 +277,16 @@ Vec3d maximize(Mat &A, Mat &B){
 
         Mat DBD = D_inv.t() * B * D_inv;
 
-        // Solve the equations system using SVD decomposition
-        Mat sing_values, l_sing_vectors, r_sing_vectors;
-        SVD::compute( DBD, sing_values, l_sing_vectors, r_sing_vectors, 0 );
+        // // Solve the equations system using SVD decomposition
+        // Mat sing_values, l_sing_vectors, r_sing_vectors;
+        // SVD::compute( DBD, sing_values, l_sing_vectors, r_sing_vectors, 0 );
 
-        Mat y = r_sing_vectors.row(r_sing_vectors.rows-1);
+        Mat eigenvalues, eigenvectors;
+        eigen(DBD, eigenvalues, eigenvectors);
+
+        Mat y = eigenvectors.row(0); //r_sing_vectors.row(r_sing_vectors.rows-1);
+
+        cout << "EIGEN VALUES: " << eigenvalues << endl;
 
         Mat sol = D_inv*y.t();
 
