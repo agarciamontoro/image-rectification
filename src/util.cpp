@@ -499,14 +499,17 @@ void getShearingTransforms(const Mat &img_1, const Mat &img_2,
     double scale = sqrt(A/Ap);
     double min_y = min_y_1 < min_y_2 ? min_y_1 : min_y_2;
 
-    H_s = Mat::eye(3, 3, CV_64F);
-    Hp_s = Mat::eye(3, 3, CV_64F);
+    Mat W = Mat::eye(3, 3, CV_64F);
+    Mat Wp = Mat::eye(3, 3, CV_64F);
 
-    H_s.at<double>(0,0) = H_s.at<double>(1,1) = scale;
-    Hp_s.at<double>(0,0) = Hp_s.at<double>(1,1) = scale;
+    W.at<double>(0,0) = W.at<double>(1,1) = scale;
+    Wp.at<double>(0,0) = Wp.at<double>(1,1) = scale;
 
-    H_s.at<double>(0,2) = -min_x_1;
-    Hp_s.at<double>(0,2) = -min_x_2;
+    W.at<double>(0,2) = -min_x_1;
+    Wp.at<double>(0,2) = -min_x_2;
 
-    H_s.at<double>(1,2) = Hp_s.at<double>(1,2) = -min_y;
+    W.at<double>(1,2) = Wp.at<double>(1,2) = -min_y;
+
+    H_s = W*S;
+    Hp_s = Wp*Sp;
 }
