@@ -117,7 +117,7 @@ Mat fundamentalMat(Mat &one, Mat &other,
     pair<vector<Point2f>, vector<Point2f> > matches;
     Mat F;
 
-    matches = match(one, other, descriptor_id::BRUTE_FORCE, detector_id::BRISK);
+    matches = match(one, other, descriptor_id::BRUTE_FORCE, detector_id::ORB);
 
     vector<unsigned char> mask;
     F = findFundamentalMat(matches.first, matches.second,
