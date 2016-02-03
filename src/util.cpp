@@ -9,7 +9,8 @@ float computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole
     vector<Point2d> good_matches_1;
     vector<Point2d> good_matches_2;
 
-    fund_mat = fundamentalMat(one, other, good_matches_1, good_matches_2);
+    // fund_mat = fundamentalMat(one, other, good_matches_1, good_matches_2);
+    fund_mat = manualFundMat(good_matches_1, good_matches_2);
 
     vector<Vec3d> lines_1, lines_2;
 
@@ -73,7 +74,7 @@ float computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole
                       sqrt(line_2[0]*line_2[0] + line_2[1]*line_2[1]);
      }
 
-     // Obtain epipole
+     // Obtain epipoles
      epipole2 = lineIntersection(lines_1[0], lines_1[1]);
      epipole1 = lineIntersection(lines_2[0], lines_2[1]);
 
@@ -296,4 +297,54 @@ Vec3d getInitialGuess(Mat &A, Mat &B, Mat &Ap, Mat &Bp){
     cout << "Z_2: " << z_2 << endl <<"Normalizado: " << normalize(z_2) << endl;
 
     return (normalize(z_1) + normalize(z_2))/2;
+}
+
+Mat manualFundMat( vector<Point2d> &good_matches_1,
+                    vector<Point2d> &good_matches_2){
+    // Taking points by hand
+    vector<Point> origin, destination;
+
+    origin.push_back(Point(63, 31));
+    origin.push_back(Point(69, 39));
+    origin.push_back(Point(220, 13));
+    origin.push_back(Point(444, 23));
+    origin.push_back(Point(355, 45));
+    origin.push_back(Point(347, 55));
+    origin.push_back(Point(80, 319));
+    origin.push_back(Point(85, 313));
+    origin.push_back(Point(334, 371));
+    origin.push_back(Point(342, 381));
+
+    origin.push_back(Point(213, 126));
+    origin.push_back(Point(298, 158));
+    origin.push_back(Point(219, 266));
+
+    destination.push_back(Point(159, 51));
+    destination.push_back(Point(167, 59));
+    destination.push_back(Point(81, 28));
+    destination.push_back(Point(293, 20));
+    destination.push_back(Point(440, 38));
+    destination.push_back(Point(435, 45));
+    destination.push_back(Point(171, 372));
+    destination.push_back(Point(178, 363));
+    destination.push_back(Point(420, 305));
+    destination.push_back(Point(424, 311));
+
+    destination.push_back(Point(188, 140));
+    destination.push_back(Point(235, 156));
+    destination.push_back(Point(202, 278));
+
+    vector<unsigned char> mask;
+    Mat fund_mat = findFundamentalMat(origin, destination,
+                           CV_FM_8POINT | CV_FM_RANSAC,
+                           20, 0.99, mask );
+
+   for (size_t i = 0; i < mask.size(); i++) {
+       if(/*mask[i] == 1*/true){
+           good_matches_1.push_back(origin[i]);
+           good_matches_2.push_back(destination[i]);
+       }
+   }
+
+    return fund_mat;
 }

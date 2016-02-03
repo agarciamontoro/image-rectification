@@ -9,13 +9,12 @@ using namespace cv;
 using namespace std;
 
 int main(){
-    // Mat img_1 = imread("img/Vmort1.pgm");
-    // Mat img_2 = imread("img/Vmort2.pgm");
+    /****************** EPIPOLAR GEOMETRY **************************/
+    // // Mat img_1 = imread("img/Vmort1.pgm");
+    // // Mat img_2 = imread("img/Vmort2.pgm");
 
     Mat img_1 = imread("img/monitogo.png");
     Mat img_2 = imread("img/monitogo2.png");
-
-    cout << img_1.cols << " " << img_1.rows << endl;
 
     Mat fund_mat;
 
@@ -25,6 +24,8 @@ int main(){
     Mat A, B, Ap, Bp;
 
     Mat e_x = crossProductMatrix(epipole1);
+
+    /****************** PROJECTIVE **************************/
 
     obtainAB(img_1, e_x, A, B);
     obtainAB(img_2, fund_mat, Ap, Bp);
@@ -46,6 +47,8 @@ int main(){
     Hp_p.at<double>(2,0) = wp.at<double>(0,0);
     Hp_p.at<double>(2,1) = wp.at<double>(0,1);
 
+    /****************** SIMILARITY **************************/
+
     cout << "H_p = " << H_p << endl;
     cout << "Hp_p = " << Hp_p << endl;
 
@@ -64,5 +67,4 @@ int main(){
     waitKey();
 
     destroyAllWindows();
-
 }

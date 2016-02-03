@@ -42,4 +42,7 @@ Vec3d maximize(Mat &A, Mat &B);
 
 Vec3d getInitialGuess(Mat &A, Mat &B, Mat &Ap, Mat &Bp);
 
+Mat manualFundMat( vector<Point2d> &good_matches_1,
+                    vector<Point2d> &good_matches_2);
+
 #endif
