@@ -30,3 +30,5 @@
 # Directories
 bin/*
 obj/*
+
+makefile

@@ -24,6 +24,8 @@ enum descriptor_id{
     FLANN_BASE
 };
 
+string type2str(int type);
+
 float computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole, Mat &fund_mat);
 
 Mat fundamentalMat(Mat &one, Mat &other, vector<Point2d> &good_matches_1, vector<Point2d> &good_matches_2);
