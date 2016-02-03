@@ -49,6 +49,26 @@ int main(){
 
     /****************** SIMILARITY **************************/
 
+    double vp_c = getMinimumYcoordinate(img_1, img_2, H_p, Hp_p);
+
+    vector<Point2f> corners(4), corners_trans(4);
+
+    corners[0] = Point2f(0,0);
+    corners[1] = Point2f(img.cols,0);
+    corners[2] = Point2f(img.cols,img.rows);
+    corners[3] = Point2f(0,img.rows);
+
+    perspectiveTransform(corners, corners_trans, homography);
+
+    float min_y;
+    min_y = +INF;
+
+    for (int j = 0; j < 4; j++) {
+        min_y = min(corners_trans[j].y, min_y);
+    }
+
+    /****************** RECTIFY IMAGES **********************/
+
     cout << "H_p = " << H_p << endl;
     cout << "Hp_p = " << Hp_p << endl;
 

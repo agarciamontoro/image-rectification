@@ -348,3 +348,5 @@ Mat manualFundMat( vector<Point2d> &good_matches_1,
 
     return fund_mat;
 }
+
+void getMinimumYcoordinate(img_1, img_2, H_p, Hp_p);
