@@ -349,4 +349,20 @@ Mat manualFundMat( vector<Point2d> &good_matches_1,
     return fund_mat;
 }
 
-void getMinimumYcoordinate(img_1, img_2, H_p, Hp_p);
+void getMinimumYcoordinate(img_1, img_2, H_p, Hp_p){
+    vector<Point2f> corners(4), corners_trans(4);
+
+    corners[0] = Point2f(0,0);
+    corners[1] = Point2f(img.cols,0);
+    corners[2] = Point2f(img.cols,img.rows);
+    corners[3] = Point2f(0,img.rows);
+
+    perspectiveTransform(corners, corners_trans, homography);
+
+    float min_y;
+    min_y = +INF;
+
+    for (int j = 0; j < 4; j++) {
+        min_y = min(corners_trans[j].y, min_y);
+    }
+}

@@ -45,4 +45,6 @@ Vec3d getInitialGuess(Mat &A, Mat &B, Mat &Ap, Mat &Bp);
 Mat manualFundMat( vector<Point2d> &good_matches_1,
                     vector<Point2d> &good_matches_2);
 
+void getMinimumYcoordinate(img_1, img_2, H_p, Hp_p);
+
 #endif
