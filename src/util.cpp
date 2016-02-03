@@ -374,4 +374,42 @@ double getMinYCoord(const Mat &img, const Mat &homography){
     for (int j = 0; j < 4; j++) {
         min_y = min(corners_trans[j].y, min_y);
     }
+
+    return min_y;
+}
+
+Mat getS(const Mat &img, const Mat &homography){
+    int w = img.cols;
+    int h = img.rows;
+
+    Point2f a((w-1)/2, 0);
+    Point2f b(w-1, (h-1)/2);
+    Point2f c((w-1)/2, h-1);
+    Point2f d(0, (h-1)/2);
+
+    vector<Point2f> midpoints, midpoints_hat;
+    midpoints.push_back(a);
+    midpoints.push_back(b);
+    midpoints.push_back(c);
+    midpoints.push_back(d);
+
+
+    perspectiveTransform(midpoints, midpoints_hat, homography);
+
+    Point2f x = midpoints_hat[1] - midpoints_hat[3];
+    Point2f y = midpoints_hat[2] - midpoints_hat[0];
+
+    double coeff_a = (h*h*x.y*x.y + w*w*y.y*y.y) / (h*w * (x.y*y.x - x.x*y.y));
+    double coeff_b = (h*h*x.x*x.y + w*w*y.x*y.y) / (h*w * (x.x*y.y - x.y*y.x));
+
+    if( coeff_a < 0 ){
+        coeff_a *= -1;
+        coeff_b *= -1;
+    }
+
+    Mat S = Mat::eye(3, 3, CV_64F);
+    S.at<double>(0,0) = coeff_a;
+    S.at<double>(0,1) = coeff_b;
+
+    return S;
 }

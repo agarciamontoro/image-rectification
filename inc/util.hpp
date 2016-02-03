@@ -51,4 +51,6 @@ double getTranslationTerm(const Mat &img_1, const Mat &img_2, const Mat &H_p, co
 
 double getMinYCoord(const Mat &img, const Mat &homography);
 
+Mat getS(const Mat &img, const Mat &homography);
+
 #endif

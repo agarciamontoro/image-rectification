@@ -51,8 +51,6 @@ int main(){
 
     double vp_c = getTranslationTerm(img_1, img_2, H_p, Hp_p);
 
-    cout << endl << endl << "\t\t\t\t" << vp_c << endl << endl;
-
     Mat H_r = Mat::zeros(3, 3, CV_64F);
 
     H_r.at<double>(0,0) = fund_mat.at<double>(2,1) - w.at<double>(0,1) * fund_mat.at<double>(2,2);
@@ -75,6 +73,13 @@ int main(){
     Hp_r.at<double>(1,2) = vp_c;
     Hp_r.at<double>(2,2) = 1.0;
 
+    /******************* SHEARING ***************************/
+
+    Mat S = getS(img_1, H_r*H_p);
+    Mat Sp = getS(img_2, Hp_r*Hp_p);
+
+    Mat H_s = getShearingTransform(img_1, img_2, S*H_r*H_p);
+    Mat Hp_s = getShearingTransform(img_1, img_2, Sp*Hp_r*Hp_p);
 
     /****************** RECTIFY IMAGES **********************/
 
@@ -84,8 +89,8 @@ int main(){
     Mat img_1_dst = Mat::zeros(512,512,CV_64F);
     Mat img_2_dst = Mat::zeros(512,512,CV_64F);
 
-    warpPerspective( img_1, img_1_dst, H_p, img_1.size() );
-    warpPerspective( img_2, img_2_dst, Hp_p, img_2.size() );
+    warpPerspective( img_1, img_1_dst, S*H_r*H_p, img_1.size() );
+    warpPerspective( img_2, img_2_dst, Sp*Hp_r*Hp_p, img_2.size() );
 
     draw(img_1, "1");
     draw(img_1_dst, "1 proyectada");
