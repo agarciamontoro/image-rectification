@@ -16,8 +16,8 @@ int main(){
     Mat img_1 = imread("img/monitogo.png");
     Mat img_2 = imread("img/monitogo2.png");
 
-    // Mat img_1 = imread("/home/alejandro/Documentos/Dropbox/Universidad/Vision por Computador/Foticos/img1.png");
-    // Mat img_2 = imread("/home/alejandro/Documentos/Dropbox/Universidad/Vision por Computador/Foticos/img2.png");
+    // Mat img_1 = imread("/home/antonio/Dropbox/Universidad/Vision por Computador/Foticos/img1.png");
+    // Mat img_2 = imread("/home/antonio/Dropbox/Universidad/Vision por Computador/Foticos/img2.png");
 
     Mat fund_mat;
 
@@ -159,7 +159,10 @@ int main(){
     draw(img_2, "2");
     draw(img_2_dst, "2 proyectada");
 
-    waitKey();
+    char c = 'a';
+
+    while (c != 'q')
+      c = waitKey();
 
     destroyAllWindows();
 }

@@ -117,12 +117,12 @@ Mat fundamentalMat(Mat &one, Mat &other,
     pair<vector<Point2f>, vector<Point2f> > matches;
     Mat F;
 
-    matches = match(one, other, descriptor_id::BRUTE_FORCE, detector_id::ORB);
+    matches = match(one, other, descriptor_id::BRUTE_FORCE, detector_id::BRISK);
 
     vector<unsigned char> mask;
     F = findFundamentalMat(matches.first, matches.second,
                            CV_FM_8POINT | CV_FM_RANSAC,
-                           1., 0.99, mask );
+                           0.25, 0.99, mask );
 
     for (size_t i = 0; i < mask.size(); i++) {
         if(mask[i] == 1){
@@ -203,8 +203,8 @@ Mat detectFeatures(Mat image, enum detector_id det_id, vector<KeyPoint> &keypoin
         // Declare BRISK and BRISK detectors
         detector = BRISK::create(
             30,   // thresh = 30
-    		3,    // octaves = 3
-    		1.0f  // patternScale = 1.0f
+    		    3,    // octaves = 3
+    		    1.0f  // patternScale = 1.0f
         );
     }
 
@@ -324,7 +324,11 @@ Vec3d maximize(Mat &A, Mat &B){
         return res;
     }
 
-    cout << "\n\n\n-----------------------------ERROR WARNING CUIDADO EEEEYDONDECOÑOVAS-----------------------\n\n\n" << endl;
+    Mat eigenvalues;
+    eigen(A, eigenvalues);
+
+    cout << "\n\n\n-----------------------------ERROR WARNING CUIDADO EEEEYDONDECOÑOVAS-----------------------" << endl;
+    cout << "A eigenvalues: " << eigenvalues << endl << endl;
 
     return Vec3d(0, 0, 0);
 }
