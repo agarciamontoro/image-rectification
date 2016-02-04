@@ -74,4 +74,6 @@ Mat rectifyPrecisionMatrix(const Mat &A);
 
 bool choleskyCustomDecomp(const Mat &A, Mat &L);
 
+bool isImageInverted(const Mat &img, const Mat &homography);
+
 #endif

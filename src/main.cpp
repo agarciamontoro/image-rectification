@@ -10,14 +10,14 @@ using namespace std;
 
 int main(){
     /****************** EPIPOLAR GEOMETRY **************************/
-    Mat img_1 = imread("img/Vmort1.pgm");
-    Mat img_2 = imread("img/Vmort2.pgm");
+    // Mat img_1 = imread("img/Vmort1.pgm");
+    // Mat img_2 = imread("img/Vmort2.pgm");
 
     // Mat img_1 = imread("img/monitogo.png");
     // Mat img_2 = imread("img/monitogo2.png");
 
-    // Mat img_1 = imread("/home/antonio/Dropbox/Universidad/Vision por Computador/Foticos/img1.png");
-    // Mat img_2 = imread("/home/antonio/Dropbox/Universidad/Vision por Computador/Foticos/img2.png");
+    Mat img_1 = imread("/home/antonio/Dropbox/Universidad/Vision por Computador/Foticos/img1.png");
+    Mat img_2 = imread("/home/antonio/Dropbox/Universidad/Vision por Computador/Foticos/img2.png");
 
     Mat fund_mat;
 
@@ -107,7 +107,6 @@ int main(){
     Mat Hp = Hp_s * Hp_r * Hp_p;
 
 
-
             // Get homography image of the corner coordinates from all the images to obtain mosaic size
             vector<Point2d> corners_all(4), corners_all_t(4);
             double min_x, min_y, max_x, max_y;
@@ -179,15 +178,6 @@ int main(){
       c = waitKey();
 
     destroyAllWindows();
-    //
-    // double data[3][3] = {
-    //   {4, 12, -16},
-    //   {12,37,-43},
-    //   {-16,-43,98}
-    // };
-    //
-    // Mat PoC(3,3,CV_64F, data);
-    // Mat L;
-    // choleskyCustomDecomp(PoC, L);
-    // cout << "\n\n\n\nCHOLESKY\n" << L << endl;
+
+    cout << ROJO << "H = " << H << "\nHp = " << Hp << RESET << endl;
 }

@@ -468,6 +468,7 @@ Mat getS(const Mat &img, const Mat &homography){
         S.at<double>(0,1) = coeff_b;
     }
 
+
     Mat EQ18 = (S * Mat(x_hom)).t() * (S * Mat(y_hom));
     cout << ROJO << "EQ18 " << EQ18 << RESET << endl;
 
@@ -523,6 +524,7 @@ void getShearingTransforms(const Mat &img_1, const Mat &img_2,
 
     double scale = sqrt(A/Ap);
     cout << "A = " << A << " \n/ Ap = " << Ap << endl;
+
     double min_y = min_y_1 < min_y_2 ? min_y_1 : min_y_2;
 
     // We define W2 as the scale transformation and W1 as the translation
@@ -539,6 +541,11 @@ void getShearingTransforms(const Mat &img_1, const Mat &img_2,
 
     W_2.at<double>(0,0) = W_2.at<double>(1,1) = scale;
     Wp_2.at<double>(0,0) = Wp_2.at<double>(1,1) = scale;
+
+    if(isImageInverted(img_1, W_2*H_1)){
+      W_2.at<double>(0,0) = W_2.at<double>(1,1) = -scale;
+      Wp_2.at<double>(0,0) = Wp_2.at<double>(1,1) = -scale;
+    }
 
             corners[0] = Point2d(0,0);
             corners[1] = Point2d(img_1.cols,0);
@@ -661,4 +668,15 @@ bool choleskyCustomDecomp(const Mat &A, Mat &L){
   L = L.t();
 
   return true;
+}
+
+bool isImageInverted(const Mat &img, const Mat &homography){
+  vector<Point2d> corners(2), corners_trans(2);
+
+  corners[0] = Point2d(0,0);
+  corners[1] = Point2d(0,img.rows);
+
+  perspectiveTransform(corners, corners_trans, homography);
+
+  return corners_trans[1].y - corners_trans[0].y < 0.0;
 }
