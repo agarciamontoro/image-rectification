@@ -14,6 +14,16 @@ using namespace std;
 
 #define INF 2147483647.0
 
+#define NEGRO   "\033[1;30m"
+#define ROJO    "\033[1;31m"
+#define VERDE   "\033[1;32m"
+#define AMARILLO "\033[1;33m"
+#define AZUL    "\033[1;34m"
+#define MAGENTA "\033[1;35m"
+#define CYAN    "\033[1;36m"
+#define BLANCO  "\033[1;37m"
+#define RESET   "\033[0m"
+
 enum detector_id{
     ORB,
     BRISK

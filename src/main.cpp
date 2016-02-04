@@ -10,14 +10,14 @@ using namespace std;
 
 int main(){
     /****************** EPIPOLAR GEOMETRY **************************/
-    // Mat img_1 = imread("img/Vmort1.pgm");
-    // Mat img_2 = imread("img/Vmort2.pgm");
+    Mat img_1 = imread("img/Vmort1.pgm");
+    Mat img_2 = imread("img/Vmort2.pgm");
 
     // Mat img_1 = imread("img/monitogo.png");
     // Mat img_2 = imread("img/monitogo2.png");
 
-    Mat img_1 = imread("/home/antonio/Dropbox/Universidad/Vision por Computador/Foticos/img1.png");
-    Mat img_2 = imread("/home/antonio/Dropbox/Universidad/Vision por Computador/Foticos/img2.png");
+    // Mat img_1 = imread("/home/antonio/Dropbox/Universidad/Vision por Computador/Foticos/img1.png");
+    // Mat img_2 = imread("/home/antonio/Dropbox/Universidad/Vision por Computador/Foticos/img2.png");
 
     Mat fund_mat;
 

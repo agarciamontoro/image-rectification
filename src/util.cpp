@@ -445,7 +445,6 @@ Mat getS(const Mat &img, const Mat &homography){
     midpoints.push_back(c);
     midpoints.push_back(d);
 
-
     perspectiveTransform(midpoints, midpoints_hat, homography);
 
     Point2d x = midpoints_hat[1] - midpoints_hat[3];
@@ -457,30 +456,32 @@ Mat getS(const Mat &img, const Mat &homography){
     Mat S = Mat::eye(3, 3, CV_64F);
     S.at<double>(0,0) = coeff_a;
     S.at<double>(0,1) = coeff_b;
+    Vec3d x_v(x.x, x.y, 0.0);
+    Vec3d y_v(y.x, y.y, 0.0);
+
+    S.at<double>(0,0) *= 1;
+    S.at<double>(0,1) *= 1;
+
+    Mat EQ18 = (S * Mat(x_v)).t() * (S * Mat(y_v));
+    cout << ROJO << "EQ18 " << EQ18 << RESET << endl;
+
+    Mat EQ19 = ((S * Mat(x_v)).t() * (S * Mat(x_v))) / ((S * Mat(y_v)).t() * (S * Mat(y_v)));
+    cout << ROJO << "EQ19 " << EQ19 << RESET << endl;
+    cout << ROJO << "w2/h2 = " << (1.*w*w)/(1.*h*h) << RESET << endl;
 
     if( coeff_a < 0 ){
-        cout << "HE ENTRAAAAAAAAOOOOOOOOOOOOOO\nOOOOOOOOOOOOOOOO" << endl;
-        Vec3d x_v(x.x, x.y, 0.0);
-        Vec3d y_v(y.x, y.y, 0.0);
-
-
-        Mat res = (S * Mat(x_v)).t() * (S * Mat(x_v));
-        cout << "RESSSSS " << res << endl;
-
         coeff_a *= -1;
         S.at<double>(0,0) = coeff_a;
 
+        EQ18 = (S * Mat(x_v)).t() * (S * Mat(y_v));
+        cout << "EQ18 " << EQ18 << endl;
 
-
-        res = (S * Mat(x_v)).t() * (S * Mat(y_v));
-        cout << "RESSSSS " << res << endl;
-
-        if (res.at<double>(0,0) != 0.0){
+        if (EQ18.at<double>(0,0) != 0.0){
           coeff_b *= -1;
           S.at<double>(0,1) = coeff_b;
         }
-        res = (S * Mat(x_v)).t() * (S * Mat(x_v));
-        cout << "RESSSSS " << res << endl;
+        EQ18 = (S * Mat(x_v)).t() * (S * Mat(y_v));
+        cout << "EQ18 " << EQ18 << endl;
 
     }
 
@@ -500,32 +501,32 @@ void getShearingTransforms(const Mat &img_1, const Mat &img_2,
     double A = img_1.cols*img_1.rows + img_2.cols*img_2.rows;
     double Ap = 0;
 
-    vector<Point2d> corners(4), corners_trans(4);
+    vector<Point2f> corners(4), corners_trans(4);
 
-    corners[0] = Point2d(0,0);
-    corners[1] = Point2d(img_1.cols,0);
-    corners[2] = Point2d(img_1.cols,img_1.rows);
-    corners[3] = Point2d(0,img_1.rows);
+    corners[0] = Point2f(0,0);
+    corners[1] = Point2f(img_1.cols,0);
+    corners[2] = Point2f(img_1.cols,img_1.rows);
+    corners[3] = Point2f(0,img_1.rows);
 
     perspectiveTransform(corners, corners_trans, S*H_1);
     Ap += contourArea(corners_trans);
 
-    double min_x_1, min_y_1;
+    float min_x_1, min_y_1;
     min_x_1 = min_y_1 = +INF;
     for (int j = 0; j < 4; j++) {
         min_x_1 = min(corners_trans[j].x, min_x_1);
         min_y_1 = min(corners_trans[j].y, min_y_1);
     }
 
-    corners[0] = Point2d(0,0);
-    corners[1] = Point2d(img_2.cols,0);
-    corners[2] = Point2d(img_2.cols,img_2.rows);
-    corners[3] = Point2d(0,img_2.rows);
+    corners[0] = Point2f(0,0);
+    corners[1] = Point2f(img_2.cols,0);
+    corners[2] = Point2f(img_2.cols,img_2.rows);
+    corners[3] = Point2f(0,img_2.rows);
 
     perspectiveTransform(corners, corners_trans, Sp*H_2);
     Ap += contourArea(corners_trans);
 
-    double min_x_2, min_y_2;
+    float min_x_2, min_y_2;
     min_x_2 = min_y_2 = +INF;
     for (int j = 0; j < 4; j++) {
         min_x_2 = min(corners_trans[j].x, min_x_2);
