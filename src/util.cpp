@@ -456,35 +456,23 @@ Mat getS(const Mat &img, const Mat &homography){
     Mat S = Mat::eye(3, 3, CV_64F);
     S.at<double>(0,0) = coeff_a;
     S.at<double>(0,1) = coeff_b;
-    Vec3d x_v(x.x, x.y, 0.0);
-    Vec3d y_v(y.x, y.y, 0.0);
 
-    S.at<double>(0,0) *= 1;
-    S.at<double>(0,1) *= 1;
-
-    Mat EQ18 = (S * Mat(x_v)).t() * (S * Mat(y_v));
-    cout << ROJO << "EQ18 " << EQ18 << RESET << endl;
-
-    Mat EQ19 = ((S * Mat(x_v)).t() * (S * Mat(x_v))) / ((S * Mat(y_v)).t() * (S * Mat(y_v)));
-    cout << ROJO << "EQ19 " << EQ19 << RESET << endl;
-    cout << ROJO << "w2/h2 = " << (1.*w*w)/(1.*h*h) << RESET << endl;
+    Vec3d x_hom(x.x, x.y, 0.0);
+    Vec3d y_hom(y.x, y.y, 0.0);
 
     if( coeff_a < 0 ){
         coeff_a *= -1;
+        coeff_b *= -1;
+
         S.at<double>(0,0) = coeff_a;
-
-        EQ18 = (S * Mat(x_v)).t() * (S * Mat(y_v));
-        cout << "EQ18 " << EQ18 << endl;
-
-        if (EQ18.at<double>(0,0) != 0.0){
-          coeff_b *= -1;
-          S.at<double>(0,1) = coeff_b;
-        }
-        EQ18 = (S * Mat(x_v)).t() * (S * Mat(y_v));
-        cout << "EQ18 " << EQ18 << endl;
-
+        S.at<double>(0,1) = coeff_b;
     }
 
+    Mat EQ18 = (S * Mat(x_hom)).t() * (S * Mat(y_hom));
+    cout << ROJO << "EQ18 " << EQ18 << RESET << endl;
+
+    Mat EQ19 = ((S * Mat(x_hom)).t() * (S * Mat(x_hom))) / ((S * Mat(y_hom)).t() * (S * Mat(y_hom))) - (1.*w*w)/(1.*h*h);
+    cout << ROJO << "EQ19 " << EQ19 << RESET << endl;
 
     cout << "S = " << S << endl;
 
