@@ -26,11 +26,11 @@ enum descriptor_id{
 
 string type2str(int type);
 
-float computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole, Mat &fund_mat);
+double computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole, Mat &fund_mat);
 
 Mat fundamentalMat(Mat &one, Mat &other, vector<Point2d> &good_matches_1, vector<Point2d> &good_matches_2);
 
-pair< vector<Point2f>, vector<Point2f> > match(Mat &one, Mat &other, enum descriptor_id descriptor , enum detector_id detector);
+pair< vector<Point2d>, vector<Point2d> > match(Mat &one, Mat &other, enum descriptor_id descriptor , enum detector_id detector);
 
 Mat detectFeatures(Mat image, enum detector_id det_id, vector<KeyPoint> &keypoints);
 
@@ -59,5 +59,9 @@ Mat getS(const Mat &img, const Mat &homography);
 void getShearingTransforms(const Mat &img_1, const Mat &img_2,
                           const Mat &H_1, const Mat &H_2,
                           Mat &H_s, Mat &Hp_s);
+
+Mat rectifyPrecisionMatrix(const Mat &A);
+
+bool choleskyCustomDecomp(const Mat &A, Mat &L);
 
 #endif

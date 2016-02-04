@@ -13,11 +13,11 @@ int main(){
     // Mat img_1 = imread("img/Vmort1.pgm");
     // Mat img_2 = imread("img/Vmort2.pgm");
 
-    Mat img_1 = imread("img/monitogo.png");
-    Mat img_2 = imread("img/monitogo2.png");
+    // Mat img_1 = imread("img/monitogo.png");
+    // Mat img_2 = imread("img/monitogo2.png");
 
-    // Mat img_1 = imread("/home/antonio/Dropbox/Universidad/Vision por Computador/Foticos/img1.png");
-    // Mat img_2 = imread("/home/antonio/Dropbox/Universidad/Vision por Computador/Foticos/img2.png");
+    Mat img_1 = imread("/home/antonio/Dropbox/Universidad/Vision por Computador/Foticos/img1.png");
+    Mat img_2 = imread("/home/antonio/Dropbox/Universidad/Vision por Computador/Foticos/img2.png");
 
     Mat fund_mat;
 
@@ -28,6 +28,9 @@ int main(){
 
     Mat e_x = crossProductMatrix(epipole);
 
+    cout << "Epipole: " <<  epipole << endl;
+    cout << "e_x = " << e_x << endl;
+
     /****************** PROJECTIVE **************************/
 
     obtainAB(img_1, e_x, A, B);
@@ -35,6 +38,8 @@ int main(){
 
     cout << "A = " << A << endl;
     cout << "B = " << B << endl;
+    cout << "Ap = " << Ap << endl;
+    cout << "Bp = " << Bp << endl << endl;
     Vec3d z = getInitialGuess(A, B, Ap, Bp);
 
     cout << "z = " << z << endl;
@@ -101,16 +106,18 @@ int main(){
     Mat H = H_s * H_r * H_p;
     Mat Hp = Hp_s * Hp_r * Hp_p;
 
+
+
             // Get homography image of the corner coordinates from all the images to obtain mosaic size
-            vector<Point2f> corners_all(4), corners_all_t(4);
-            float min_x, min_y, max_x, max_y;
+            vector<Point2d> corners_all(4), corners_all_t(4);
+            double min_x, min_y, max_x, max_y;
             min_x = min_y = +INF;
             max_x = max_y = -INF;
 
-            corners_all[0] = Point2f(0,0);
-            corners_all[1] = Point2f(img_1.cols,0);
-            corners_all[2] = Point2f(img_1.cols,img_1.rows);
-            corners_all[3] = Point2f(0,img_1.rows);
+            corners_all[0] = Point2d(0,0);
+            corners_all[1] = Point2d(img_1.cols,0);
+            corners_all[2] = Point2d(img_1.cols,img_1.rows);
+            corners_all[3] = Point2d(0,img_1.rows);
 
             perspectiveTransform(corners_all, corners_all_t, H);
 
@@ -129,10 +136,10 @@ int main(){
             min_x = min_y = +INF;
             max_x = max_y = -INF;
 
-            corners_all[0] = Point2f(0,0);
-            corners_all[1] = Point2f(img_2.cols,0);
-            corners_all[2] = Point2f(img_2.cols,img_2.rows);
-            corners_all[3] = Point2f(0,img_2.rows);
+            corners_all[0] = Point2d(0,0);
+            corners_all[1] = Point2d(img_2.cols,0);
+            corners_all[2] = Point2d(img_2.cols,img_2.rows);
+            corners_all[3] = Point2d(0,img_2.rows);
 
             perspectiveTransform(corners_all, corners_all_t, Hp);
 
@@ -156,13 +163,31 @@ int main(){
     draw(img_1, "1");
     draw(img_1_dst, "1 proyectada");
 
-    draw(img_2, "2");
-    draw(img_2_dst, "2 proyectada");
-
     char c = 'a';
 
     while (c != 'q')
       c = waitKey();
 
     destroyAllWindows();
+
+    draw(img_2, "2");
+    draw(img_2_dst, "2 proyectada");
+
+    c = 'a';
+
+    while (c != 'q')
+      c = waitKey();
+
+    destroyAllWindows();
+    //
+    // double data[3][3] = {
+    //   {4, 12, -16},
+    //   {12,37,-43},
+    //   {-16,-43,98}
+    // };
+    //
+    // Mat PoC(3,3,CV_64F, data);
+    // Mat L;
+    // choleskyCustomDecomp(PoC, L);
+    // cout << "\n\n\n\nCHOLESKY\n" << L << endl;
 }

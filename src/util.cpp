@@ -28,12 +28,12 @@ Vec3d lineIntersection(Vec3d one, Vec3d other){
     return one.cross(other);
 }
 
-float computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole, Mat &fund_mat){
+double computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole, Mat &fund_mat){
     vector<Point2d> good_matches_1;
     vector<Point2d> good_matches_2;
 
-    // fund_mat = fundamentalMat(one, other, good_matches_1, good_matches_2);
-    fund_mat = manualFundMat(good_matches_1, good_matches_2);
+    fund_mat = fundamentalMat(one, other, good_matches_1, good_matches_2);
+    // fund_mat = manualFundMat(good_matches_1, good_matches_2);
 
     vector<Vec3d> lines_1, lines_2;
 
@@ -45,7 +45,7 @@ float computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole
 
     // Draws both sets of epipolar lines and computes the distances between
     // the lines and their corresponding points.
-    float distance_1 = 0.0, distance_2 = 0.0;
+    double distance_1 = 0.0, distance_2 = 0.0;
     for (size_t i = 0; i < lines_1.size(); i++) {
         Vec2d point_1 = good_matches_1[i];
         Vec2d point_2 = good_matches_2[i];
@@ -65,7 +65,7 @@ float computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole
                  color
                  );
             circle(one,
-                    Point2f(point_1[0], point_1[1]),
+                    Point2d(point_1[0], point_1[1]),
                     4,
                     color,
                     CV_FILLED);
@@ -78,7 +78,7 @@ float computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole
                  color
                  );
             circle(other,
-                    Point2f(point_2[0], point_2[1]),
+                    Point2d(point_2[0], point_2[1]),
                     4,
                     color,
                     CV_FILLED);
@@ -114,7 +114,7 @@ Mat fundamentalMat(Mat &one, Mat &other,
                           vector<Point2d> &good_matches_1,
                           vector<Point2d> &good_matches_2){
 
-    pair<vector<Point2f>, vector<Point2f> > matches;
+    pair<vector<Point2d>, vector<Point2d> > matches;
     Mat F;
 
     matches = match(one, other, descriptor_id::BRUTE_FORCE, detector_id::BRISK);
@@ -122,7 +122,7 @@ Mat fundamentalMat(Mat &one, Mat &other,
     vector<unsigned char> mask;
     F = findFundamentalMat(matches.first, matches.second,
                            CV_FM_8POINT | CV_FM_RANSAC,
-                           0.25, 0.99, mask );
+                           1., 0.99, mask );
 
     for (size_t i = 0; i < mask.size(); i++) {
         if(mask[i] == 1){
@@ -134,7 +134,7 @@ Mat fundamentalMat(Mat &one, Mat &other,
     return F;
 }
 
-pair< vector<Point2f>, vector<Point2f> > match(Mat &one, Mat &other, enum descriptor_id descriptor , enum detector_id detector){
+pair< vector<Point2d>, vector<Point2d> > match(Mat &one, Mat &other, enum descriptor_id descriptor , enum detector_id detector){
     // 1 - Get keypoints and its descriptors in both images
     vector<KeyPoint> keypoints[2];
     Mat descriptors[2];
@@ -168,7 +168,7 @@ pair< vector<Point2f>, vector<Point2f> > match(Mat &one, Mat &other, enum descri
     matcher->match( descriptors[0], descriptors[1], matches );
 
     // 3 - Create lists of ordered keypoints following obtained matches
-    vector<Point2f> ordered_keypoints[2];
+    vector<Point2d> ordered_keypoints[2];
 
     for( unsigned int i = 0; i < matches.size(); i++ )
     {
@@ -177,7 +177,7 @@ pair< vector<Point2f>, vector<Point2f> > match(Mat &one, Mat &other, enum descri
       ordered_keypoints[1].push_back( keypoints[1][matches[i].trainIdx].pt );
     }
 
-    return pair< vector<Point2f>, vector<Point2f> >(ordered_keypoints[0], ordered_keypoints[1]);
+    return pair< vector<Point2d>, vector<Point2d> >(ordered_keypoints[0], ordered_keypoints[1]);
 }
 
 Mat detectFeatures(Mat image, enum detector_id det_id, vector<KeyPoint> &keypoints){
@@ -231,9 +231,10 @@ void draw(Mat img, string name){
 
 // https://github.com/Itseez/opencv/blob/master/modules/stitching/src/autocalib.cpp
 bool choleskyDecomp(Mat &A, Mat &D){
-    size_t astep = A.step;
-    double* data = A.ptr<double>();
-    int size = A.cols;
+    Mat tmp = A.clone();
+    size_t astep = tmp.step;
+    double* data = tmp.ptr<double>();
+    int size = tmp.cols;
 
     if ( Cholesky(data, astep, size, 0, 0, 0) ){
         astep /= sizeof(data[0]);
@@ -241,7 +242,7 @@ bool choleskyDecomp(Mat &A, Mat &D){
             data[i*astep + i] = (double)(1./data[i*astep + i]);
         }
 
-        D = A.clone();
+        D = tmp.clone();
         D.at<double>(0,1) = D.at<double>(0,2) = D.at<double>(1,2) = 0;
 
         D = D.t();
@@ -295,7 +296,12 @@ Mat crossProductMatrix(Vec3d elem){
 
 Vec3d maximize(Mat &A, Mat &B){
     Mat D;
-    if( choleskyDecomp(A, D) ){
+    // cout << "A inside chol = " << A << endl;
+    // Mat tmp = rectifyPrecisionMatrix(A);
+    // cout << "A after rec = " << A << endl;
+    // cout << "tmp after rec = " << tmp << endl;
+    if( choleskyCustomDecomp(A, D) ){
+
         Mat D_inv = D.inv();
 
         Mat DBD = D_inv.t() * B * D_inv;
@@ -328,12 +334,14 @@ Vec3d maximize(Mat &A, Mat &B){
     eigen(A, eigenvalues);
 
     cout << "\n\n\n-----------------------------ERROR WARNING CUIDADO EEEEYDONDECOÑOVAS-----------------------" << endl;
-    cout << "A eigenvalues: " << eigenvalues << endl << endl;
+    cout << "A = " << A << endl;
+    cout << "A- eigenvalues: " << eigenvalues << endl << endl;
 
     return Vec3d(0, 0, 0);
 }
 
 Vec3d getInitialGuess(Mat &A, Mat &B, Mat &Ap, Mat &Bp){
+
     Vec3d z_1 = maximize(A, B);
     Vec3d z_2 = maximize(Ap, Bp);
 
@@ -403,16 +411,16 @@ double getTranslationTerm(const Mat &img_1, const Mat &img_2, const Mat &H_p, co
 }
 
 double getMinYCoord(const Mat &img, const Mat &homography){
-    vector<Point2f> corners(4), corners_trans(4);
+    vector<Point2d> corners(4), corners_trans(4);
 
-    corners[0] = Point2f(0,0);
-    corners[1] = Point2f(img.cols,0);
-    corners[2] = Point2f(img.cols,img.rows);
-    corners[3] = Point2f(0,img.rows);
+    corners[0] = Point2d(0,0);
+    corners[1] = Point2d(img.cols,0);
+    corners[2] = Point2d(img.cols,img.rows);
+    corners[3] = Point2d(0,img.rows);
 
     perspectiveTransform(corners, corners_trans, homography);
 
-    float min_y;
+    double min_y;
     min_y = +INF;
 
     for (int j = 0; j < 4; j++) {
@@ -426,12 +434,12 @@ Mat getS(const Mat &img, const Mat &homography){
     int w = img.cols;
     int h = img.rows;
 
-    Point2f a((w-1)/2, 0);
-    Point2f b(w-1, (h-1)/2);
-    Point2f c((w-1)/2, h-1);
-    Point2f d(0, (h-1)/2);
+    Point2d a((w-1)/2, 0);
+    Point2d b(w-1, (h-1)/2);
+    Point2d c((w-1)/2, h-1);
+    Point2d d(0, (h-1)/2);
 
-    vector<Point2f> midpoints, midpoints_hat;
+    vector<Point2d> midpoints, midpoints_hat;
     midpoints.push_back(a);
     midpoints.push_back(b);
     midpoints.push_back(c);
@@ -440,20 +448,44 @@ Mat getS(const Mat &img, const Mat &homography){
 
     perspectiveTransform(midpoints, midpoints_hat, homography);
 
-    Point2f x = midpoints_hat[1] - midpoints_hat[3];
-    Point2f y = midpoints_hat[2] - midpoints_hat[0];
+    Point2d x = midpoints_hat[1] - midpoints_hat[3];
+    Point2d y = midpoints_hat[2] - midpoints_hat[0];
 
     double coeff_a = (h*h*x.y*x.y + w*w*y.y*y.y) / (h*w * (x.y*y.x - x.x*y.y));
     double coeff_b = (h*h*x.x*x.y + w*w*y.x*y.y) / (h*w * (x.x*y.y - x.y*y.x));
 
-    if( coeff_a < 0 ){
-        coeff_a *= -1;
-        coeff_b *= -1;
-    }
-
     Mat S = Mat::eye(3, 3, CV_64F);
     S.at<double>(0,0) = coeff_a;
     S.at<double>(0,1) = coeff_b;
+
+    if( coeff_a < 0 ){
+        cout << "HE ENTRAAAAAAAAOOOOOOOOOOOOOO\nOOOOOOOOOOOOOOOO" << endl;
+        Vec3d x_v(x.x, x.y, 0.0);
+        Vec3d y_v(y.x, y.y, 0.0);
+
+
+        Mat res = (S * Mat(x_v)).t() * (S * Mat(x_v));
+        cout << "RESSSSS " << res << endl;
+
+        coeff_a *= -1;
+        S.at<double>(0,0) = coeff_a;
+
+
+
+        res = (S * Mat(x_v)).t() * (S * Mat(y_v));
+        cout << "RESSSSS " << res << endl;
+
+        if (res.at<double>(0,0) != 0.0){
+          coeff_b *= -1;
+          S.at<double>(0,1) = coeff_b;
+        }
+        res = (S * Mat(x_v)).t() * (S * Mat(x_v));
+        cout << "RESSSSS " << res << endl;
+
+    }
+
+
+    cout << "S = " << S << endl;
 
     return S;
 }
@@ -468,32 +500,32 @@ void getShearingTransforms(const Mat &img_1, const Mat &img_2,
     double A = img_1.cols*img_1.rows + img_2.cols*img_2.rows;
     double Ap = 0;
 
-    vector<Point2f> corners(4), corners_trans(4);
+    vector<Point2d> corners(4), corners_trans(4);
 
-    corners[0] = Point2f(0,0);
-    corners[1] = Point2f(img_1.cols,0);
-    corners[2] = Point2f(img_1.cols,img_1.rows);
-    corners[3] = Point2f(0,img_1.rows);
+    corners[0] = Point2d(0,0);
+    corners[1] = Point2d(img_1.cols,0);
+    corners[2] = Point2d(img_1.cols,img_1.rows);
+    corners[3] = Point2d(0,img_1.rows);
 
     perspectiveTransform(corners, corners_trans, S*H_1);
     Ap += contourArea(corners_trans);
 
-    float min_x_1, min_y_1;
+    double min_x_1, min_y_1;
     min_x_1 = min_y_1 = +INF;
     for (int j = 0; j < 4; j++) {
         min_x_1 = min(corners_trans[j].x, min_x_1);
         min_y_1 = min(corners_trans[j].y, min_y_1);
     }
 
-    corners[0] = Point2f(0,0);
-    corners[1] = Point2f(img_2.cols,0);
-    corners[2] = Point2f(img_2.cols,img_2.rows);
-    corners[3] = Point2f(0,img_2.rows);
+    corners[0] = Point2d(0,0);
+    corners[1] = Point2d(img_2.cols,0);
+    corners[2] = Point2d(img_2.cols,img_2.rows);
+    corners[3] = Point2d(0,img_2.rows);
 
     perspectiveTransform(corners, corners_trans, Sp*H_2);
     Ap += contourArea(corners_trans);
 
-    float min_x_2, min_y_2;
+    double min_x_2, min_y_2;
     min_x_2 = min_y_2 = +INF;
     for (int j = 0; j < 4; j++) {
         min_x_2 = min(corners_trans[j].x, min_x_2);
@@ -501,6 +533,7 @@ void getShearingTransforms(const Mat &img_1, const Mat &img_2,
     }
 
     double scale = sqrt(A/Ap);
+    cout << "A = " << A << " \n/ Ap = " << Ap << endl;
     double min_y = min_y_1 < min_y_2 ? min_y_1 : min_y_2;
 
     // We define W2 as the scale transformation and W1 as the translation
@@ -518,10 +551,10 @@ void getShearingTransforms(const Mat &img_1, const Mat &img_2,
     W_2.at<double>(0,0) = W_2.at<double>(1,1) = scale;
     Wp_2.at<double>(0,0) = Wp_2.at<double>(1,1) = scale;
 
-            corners[0] = Point2f(0,0);
-            corners[1] = Point2f(img_1.cols,0);
-            corners[2] = Point2f(img_1.cols,img_1.rows);
-            corners[3] = Point2f(0,img_1.rows);
+            corners[0] = Point2d(0,0);
+            corners[1] = Point2d(img_1.cols,0);
+            corners[2] = Point2d(img_1.cols,img_1.rows);
+            corners[3] = Point2d(0,img_1.rows);
 
             perspectiveTransform(corners, corners_trans, W_2*S*H_1);
 
@@ -531,10 +564,10 @@ void getShearingTransforms(const Mat &img_1, const Mat &img_2,
                 min_y_1 = min(corners_trans[j].y, min_y_1);
             }
 
-            corners[0] = Point2f(0,0);
-            corners[1] = Point2f(img_2.cols,0);
-            corners[2] = Point2f(img_2.cols,img_2.rows);
-            corners[3] = Point2f(0,img_2.rows);
+            corners[0] = Point2d(0,0);
+            corners[1] = Point2d(img_2.cols,0);
+            corners[2] = Point2d(img_2.cols,img_2.rows);
+            corners[3] = Point2d(0,img_2.rows);
 
             perspectiveTransform(corners, corners_trans, Wp_2*Sp*H_2);
 
@@ -556,4 +589,87 @@ void getShearingTransforms(const Mat &img_1, const Mat &img_2,
 
     H_s = W*S;
     Hp_s = Wp*Sp;
+
+    cout << "H_s = " << H_s << "\nHp_s = " << Hp_s << endl;
+}
+
+Mat rectifyPrecisionMatrix(const Mat &A){
+  Mat eigenvalues, eigenvectors;
+
+  eigen(A, eigenvalues, eigenvectors);
+  cout << "Rectifyyyyyyng" << endl;
+
+  Mat P(3,3, CV_64F);
+
+  cout << "values " << eigenvectors << endl;
+
+  eigenvectors.row(0).copyTo(P.row(0));
+  eigenvectors.row(1).copyTo(P.row(1));
+  eigenvectors.row(2).copyTo(P.row(2));
+
+  P = P.t();
+
+  Mat D = Mat::zeros(3,3, CV_64F);
+
+  for (int i = 0; i < 3; i++) {
+    double value = eigenvalues.at<double>(i,0);
+    if (value > -1e-6 && value < 0.0)
+      D.at<double>(i,i) = -value;
+    else
+      D.at<double>(i,i) = value;
+  }
+
+  Mat res = P * D * P.inv();
+
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      double value = res.at<double>(i,j);
+      if (fabs(value) > 1e-6)
+        res.at<double>(i,j) = value;
+      else
+        res.at<double>(i,j) = 0.0;
+      }
+  }
+
+
+  cout << "Rectify A = " << A << endl;
+  cout << "Res = " << res << endl;
+
+  return res.clone();
+}
+
+
+bool choleskyCustomDecomp(const Mat &A, Mat &L){
+
+  L = Mat::zeros(3,3,CV_64F);
+
+  for (int i = 0; i < 3; i++){
+    for (int j = 0; j <= i; j++){
+      double sum = 0;
+      for (int k = 0; k < j; k++){
+        sum += L.at<double>(i,k) * L.at<double>(j,k);
+      }
+
+      L.at<double>(i,j) = A.at<double>(i,j) - sum;
+      if (i == j){
+        if (L.at<double>(i,j) < 0.0){
+          if (L.at<double>(i,j) > -1e-5){
+            L.at<double>(i,j) *= -1;
+          }
+          else{
+            cout << "ERROR HERE HERE HERE: " << L.at<double>(i,j) << endl;
+            return false;
+          }
+        }
+        L.at<double>(i,j) = sqrt(L.at<double>(i,j));
+      }
+      else{
+        L.at<double>(i,j) /= L.at<double>(j,j);
+      }
+    }
+  }
+
+  L = L.t();
+
+  return true;
 }
