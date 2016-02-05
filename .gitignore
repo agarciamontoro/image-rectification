@@ -31,5 +31,10 @@
 bin/*
 obj/*
 
+# PDFLaTeX temp
+*.aux
+*.log
+
+
 makefile
 Dropbox
