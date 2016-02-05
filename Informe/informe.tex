@@ -130,47 +130,42 @@ rulecolor=,
 
   \section{Descripción del problema}
 
-    E
+    La rectificación de imágenes es el proceso de aplicar dos homografías a un par
+    de imágenes cuya geometría epipolar conocemos, para que las líneas epipolares
+    queden horizontales y paralelas entre sí. El método que proponen \emph{Loop \& Zhang}
+    es totalmente geométrico, no precisa de conocimiento de las cámaras.
+    Se consigue descomponiendo la homografía en una proyección, una transformación
+    euclídea y una cizalla, con especial cuidado en minimizar la distorsión.
 
-    \subsection{Subsección}
-      Ejemplo de código
-      \begin{lstlisting}
-        theRNG().state = clock();
-        ...
-
-        bool Camera::isFinite()
-        {
-          // Check if the first 3x3 submatrix is regular
-          Mat M = this->camera(Rect(0,0,3,3));
-          return determinant(M) != 0.0;
-        }
-
-        Camera::Camera(float low, float high)
-        {
-          // Fill 3x4 matrix with zeros
-          this->camera = Mat::zeros(3, 4, CV_32FC1);
-
-          while (!this->isFinite())
-          {
-            // Set this->camera to randon matrix. Random values are uniformly distributed from low to high
-            randu(this->camera,low,high);
-          }
-        }
-      \end{lstlisting}
+    La motivación de la rectificación es simple: es más fácil buscar correspondencias
+    cuando las imágenes están rectificadas, ya que sólo hay que buscar en la línea
+    epipolar, siendo la distancia que separa ambas correspondencias la \emph{disparidad}.
+    Esta distancia está relacionada con la profundidad, por lo que se puede reconstruir
+    la profundidad sin noción alguna de cámaras.
 
     \section{Enfoque de la implementación y detalles de eficiencia}
 
-      Sección
+      La implementación ha tenido un enfoque totalmente funcional, nada de orientación
+      a objetos. Se han calculado las transformaciones por separado.
+
+      \subsection{Transformación proyectiva}
+      Proyectiva
+
+      \subsection{Euclídea}
+      Euclídea
+
+      \subsection{Cizalla}
 
     \section{Experimentos realizados}
 
-      Experimentos
+      Lola es muy guapa y adorable. V impone.
 
     \section{Valoración de resultados}
 
-      Valoración
+      Todo se ve de lujo
 
     \section{Conclusiones}
 
+      Este algoritmo es pro. Mejor que el de OpenCV.
 
 \end{document}
