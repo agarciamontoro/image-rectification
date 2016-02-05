@@ -29,18 +29,6 @@ string type2str(int type) {
 }
 
 /**
- * Computes the intersection of two lines given their homogeneous coordinates.
- * @param  one   Homogeneous coordinates of the first line as a Vec3d vector.
- * @param  other Homogeneous coordinates of the second line as a Vec3d vector.
- * @return       The homogeneous coordinates of the intersection point of the
- *                   lines one and other.
- */
-Vec3d lineIntersection(Vec3d one, Vec3d other){
-  // Wikipedia info Line-line intersection
-    return one.cross(other);
-}
-
-/**
  * Computes and draw epilines in a stereo pair images.
  * @param  one       First image.
  * @param  other     Second image.
@@ -278,30 +266,6 @@ void draw(Mat img, string name){
     imshow( name, image_8U );
 }
 
-// https://github.com/Itseez/opencv/blob/master/modules/stitching/src/autocalib.cpp
-bool choleskyDecomp(Mat &A, Mat &D){
-    Mat tmp = A.clone();
-    size_t astep = tmp.step;
-    double* data = tmp.ptr<double>();
-    int size = tmp.cols;
-
-    if ( Cholesky(data, astep, size, 0, 0, 0) ){
-        astep /= sizeof(data[0]);
-        for (int i = 0; i < size; ++i){
-            data[i*astep + i] = (double)(1./data[i*astep + i]);
-        }
-
-        D = tmp.clone();
-        D.at<double>(0,1) = D.at<double>(0,2) = D.at<double>(1,2) = 0;
-
-        D = D.t();
-
-        return true;
-    }
-
-    return false;
-}
-
 
 void obtainAB(const Mat &img, const Mat &mult_mat, Mat &A, Mat &B){
     int width = img.cols;
@@ -350,53 +314,54 @@ Mat crossProductMatrix(Vec3d elem){
     return sol.clone();
 }
 
-
+/**
+ * Maximize paper equations with A,B input
+ * @param  A First Mat.
+ * @param  B Second Mat.
+ * @return   Z vector with max value.
+ */
 Vec3d maximize(Mat &A, Mat &B){
-    Mat D;
-    // cout << "A inside chol = " << A << endl;
-    // Mat tmp = rectifyPrecisionMatrix(A);
-    // cout << "A after rec = " << A << endl;
-    // cout << "tmp after rec = " << tmp << endl;
+    Mat D; // Output of cholesky decomposition: upper triangular matrix.
     if( choleskyCustomDecomp(A, D) ){
 
         Mat D_inv = D.inv();
 
         Mat DBD = D_inv.t() * B * D_inv;
 
-        // // Solve the equations system using SVD decomposition
-        // Mat sing_values, l_sing_vectors, r_sing_vectors;
-        // SVD::compute( DBD, sing_values, l_sing_vectors, r_sing_vectors, 0 );
+        // Solve the equations system using eigenvalue decomposition
 
         Mat eigenvalues, eigenvectors;
         eigen(DBD, eigenvalues, eigenvectors);
 
-        Mat y = eigenvectors.row(0); //r_sing_vectors.row(r_sing_vectors.rows-1);
-
-        cout << "EIGEN VALUES: " << eigenvalues << endl;
+        // Take largest eigenvector
+        Mat y = eigenvectors.row(0);
 
         Mat sol = D_inv*y.t();
 
-        cout << type2str(sol.type()) << " sol = " <<  sol << endl;
-
-
-
         Vec3d res(sol.at<double>(0,0), sol.at<double>(1,0), sol.at<double>(2,0));
-
-        cout << type2str(sol.type()) << " res = " << res << endl;
 
         return res;
     }
 
+    // At this point, there is an error!
     Mat eigenvalues;
     eigen(A, eigenvalues);
 
-    cout << "\n\n\n-----------------------------ERROR WARNING CUIDADO EEEEYDONDECOÑOVAS-----------------------" << endl;
+    cout << "\n\n\n----------------------------- WARNING -----------------------" << endl;
     cout << "A = " << A << endl;
-    cout << "A- eigenvalues: " << eigenvalues << endl << endl;
+    cout << "A eigenvalues: " << eigenvalues << endl << endl;
 
     return Vec3d(0, 0, 0);
 }
 
+/**
+ * Get initial guess of z
+ * @param  A  A matrix.
+ * @param  B  B matrix.
+ * @param  Ap A' matrix.
+ * @param  Bp B' matrix.
+ * @return    Initial guess of z.
+ */
 Vec3d getInitialGuess(Mat &A, Mat &B, Mat &Ap, Mat &Bp){
 
     Vec3d z_1 = maximize(A, B);
@@ -408,6 +373,12 @@ Vec3d getInitialGuess(Mat &A, Mat &B, Mat &Ap, Mat &Bp){
     return (normalize(z_1) + normalize(z_2))/2;
 }
 
+/**
+ * Manual fundamental Mat for paper example
+ * @param  good_matches_1 Matches from first image.
+ * @param  good_matches_2 Matches from second image.
+ * @return                Fundamental Matrix
+ */
 Mat manualFundMat( vector<Point2d> &good_matches_1,
                     vector<Point2d> &good_matches_2){
     // Taking points by hand
@@ -458,6 +429,14 @@ Mat manualFundMat( vector<Point2d> &good_matches_1,
     return fund_mat;
 }
 
+/**
+ * Get the v'_c translation for similarity transform.
+ * @param  img_1 First image.
+ * @param  img_2 Second image.
+ * @param  H_p   First proyection.
+ * @param  Hp_p  Second proyection.
+ * @return       Translation on Y axis.
+ */
 double getTranslationTerm(const Mat &img_1, const Mat &img_2, const Mat &H_p, const Mat &Hp_p){
     double min_1 = getMinYCoord(img_1, H_p);
     double min_2 = getMinYCoord(img_2, Hp_p);
@@ -467,6 +446,12 @@ double getTranslationTerm(const Mat &img_1, const Mat &img_2, const Mat &H_p, co
     return -offset;
 }
 
+/**
+ * Get min Y coordinate from homographied image.
+ * @param  img        Input image.
+ * @param  homography Homography.
+ * @return            Min Y coordinate.
+ */
 double getMinYCoord(const Mat &img, const Mat &homography){
     vector<Point2d> corners(4), corners_trans(4);
 
@@ -487,6 +472,12 @@ double getMinYCoord(const Mat &img, const Mat &homography){
     return min_y;
 }
 
+/**
+ * Get S from Shearing transform.
+ * @param  img        Input image.
+ * @param  homography Input homography.
+ * @return            S matrix.
+ */
 Mat getS(const Mat &img, const Mat &homography){
     int w = img.cols;
     int h = img.rows;
@@ -537,6 +528,15 @@ Mat getS(const Mat &img, const Mat &homography){
     return S;
 }
 
+/**
+ * Get shearing transform for both images.
+ * @param img_1 First image.
+ * @param img_2 Second image.
+ * @param H_1   First homography.
+ * @param H_2   Second homography.
+ * @param H_s   H' shearing transform.
+ * @param Hp_s  H'_s shearing transform.
+ */
 void getShearingTransforms(const Mat &img_1, const Mat &img_2,
                            const Mat &H_1, const Mat &H_2,
                            Mat &H_s, Mat &Hp_s){
@@ -646,7 +646,12 @@ void getShearingTransforms(const Mat &img_1, const Mat &img_2,
     cout << "H_s = " << H_s << "\nHp_s = " << Hp_s << endl;
 }
 
-
+/**
+ * Cholesky decomposition.
+ * @param  A Input matrix.
+ * @param  L Output upper triangular matrix.
+ * @return   True if that decomposition exists.
+ */
 bool choleskyCustomDecomp(const Mat &A, Mat &L){
 
   L = Mat::zeros(3,3,CV_64F);

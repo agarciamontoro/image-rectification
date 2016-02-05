@@ -16,11 +16,11 @@ int main(){
     // Mat img_1 = imread("img/monitogo.png");
     // Mat img_2 = imread("img/monitogo2.png");
 
-    // Mat img_1 = imread("/home/antonio/Dropbox/Universidad/Vision por Computador/Foticos/img1.png");
-    // Mat img_2 = imread("/home/antonio/Dropbox/Universidad/Vision por Computador/Foticos/img2.png");
+    // Mat img_1 = imread("Dropbox/Universidad/Vision por Computador/Foticos/img1.png");
+    // Mat img_2 = imread("Dropbox/Universidad/Vision por Computador/Foticos/img2.png");
 
-    Mat img_1 = imread("/home/alejandro/Documentos/Dropbox/Universidad/Vision por Computador/Foticos/perra_7.jpg");
-    Mat img_2 = imread("/home/alejandro/Documentos/Dropbox/Universidad/Vision por Computador/Foticos/perra_8.jpg");
+    Mat img_1 = imread("Dropbox/Universidad/Vision por Computador/Foticos/perra_7.jpg");
+    Mat img_2 = imread("Dropbox/Universidad/Vision por Computador/Foticos/perra_8.jpg");
 
     // Buenas: madera{1-2}, perra{1-2,7-8,8-9}
     // Malas: cactus{1-2} madera{3-4,4-5,5-6}, perra{3-4,5-6}
@@ -29,6 +29,8 @@ int main(){
     Mat fund_mat;
 
     Vec3d epipole;
+
+    // Get epipolar geometry and draw epilines
     computeAndDrawEpiLines(img_1, img_2, 150, epipole, fund_mat);
 
     Mat A, B, Ap, Bp;
@@ -40,6 +42,7 @@ int main(){
 
     /****************** PROJECTIVE **************************/
 
+    // Get A,B matrix for minimize z
     obtainAB(img_1, e_x, A, B);
     obtainAB(img_2, fund_mat, Ap, Bp);
 
@@ -47,10 +50,13 @@ int main(){
     cout << "B = " << B << endl;
     cout << "Ap = " << Ap << endl;
     cout << "Bp = " << Bp << endl << endl;
+
+    // Get initial guess for z
     Vec3d z = getInitialGuess(A, B, Ap, Bp);
 
     cout << "z = " << z << endl;
 
+    // Get w
     Mat w = e_x * Mat(z);
     Mat wp = fund_mat * Mat(z);
 
@@ -60,6 +66,7 @@ int main(){
     cout << "w = " << w << endl;
     cout << "wp = " << wp << endl;
 
+    // Get final H_p and Hp_p matrix for projection
     Mat H_p = Mat::eye(3, 3, CV_64F);
     H_p.at<double>(2,0) = w.at<double>(0,0);
     H_p.at<double>(2,1) = w.at<double>(1,0);
@@ -70,10 +77,12 @@ int main(){
 
     /****************** SIMILARITY **************************/
 
+    // Get the translation term
     double vp_c = getTranslationTerm(img_1, img_2, H_p, Hp_p);
 
     cout << "vp_c = " << vp_c << endl;
 
+    // Get the H_r and Hp_r matrix directly
     Mat H_r = Mat::zeros(3, 3, CV_64F);
 
     H_r.at<double>(0,0) = fund_mat.at<double>(2,1) - w.at<double>(1,0) * fund_mat.at<double>(2,2);
@@ -103,6 +112,7 @@ int main(){
 
     Mat H_s, Hp_s;
 
+    // Get shearing transforms with the method described on the paper
     getShearingTransforms(img_1, img_2, H_1, H_2, H_s, Hp_s);
 
     /****************** RECTIFY IMAGES **********************/
@@ -160,6 +170,7 @@ int main(){
             int img_2_cols = max_x - min_x;
             int img_2_rows = max_y - min_y;
 
+    // Apply homographies
     Mat img_1_dst(img_1_rows, img_1_cols, CV_64F);
     Mat img_2_dst(img_2_rows, img_2_cols, CV_64F);
 
