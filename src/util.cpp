@@ -1,5 +1,10 @@
 #include "util.hpp"
 
+/**
+ * Gets a string from Mat type to help debugging http://stackoverflow.com/a/17820615/3370561
+ * @param  type Mat.type() integer.
+ * @return      String like CV_64F or CV_32UC3.
+ */
 string type2str(int type) {
   string r;
 
@@ -24,7 +29,7 @@ string type2str(int type) {
 }
 
 /**
- * Computes the intersection of two lines given their homogeneous coordinates
+ * Computes the intersection of two lines given their homogeneous coordinates.
  * @param  one   Homogeneous coordinates of the first line as a Vec3d vector.
  * @param  other Homogeneous coordinates of the second line as a Vec3d vector.
  * @return       The homogeneous coordinates of the intersection point of the
@@ -35,6 +40,15 @@ Vec3d lineIntersection(Vec3d one, Vec3d other){
     return one.cross(other);
 }
 
+/**
+ * Computes and draw epilines in a stereo pair images.
+ * @param  one       First image.
+ * @param  other     Second image.
+ * @param  num_lines Number of epilines to be drawn.
+ * @param  epipole   Output of the epipole.
+ * @param  fund_mat  Output of the fundamental mat.
+ * @return           Error of the epilines with the correspondences.
+ */
 double computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole, Mat &fund_mat){
     vector<Point2d> good_matches_1;
     vector<Point2d> good_matches_2;
@@ -117,6 +131,14 @@ double computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipol
      return (distance_1+distance_2)/(2*lines_1.size());
 }
 
+/**
+ * Computes fundamental matrix from 2 images
+ * @param  one            First image.
+ * @param  other          Second image.
+ * @param  good_matches_1 Output of good correspondences from one.
+ * @param  good_matches_2 Output of good correspondences from other.
+ * @return                Fundamental Matrix.
+ */
 Mat fundamentalMat(Mat &one, Mat &other,
                           vector<Point2d> &good_matches_1,
                           vector<Point2d> &good_matches_2){
@@ -141,6 +163,14 @@ Mat fundamentalMat(Mat &one, Mat &other,
     return F;
 }
 
+/**
+ * Match descriptors from two images.
+ * @param  one            First image.
+ * @param  other          Second image.
+ * @param  descriptor     Matcher to be used.
+ * @param  detector       Detector to be used.
+ * @return                Pair with correspondences.
+ */
 pair< vector<Point2d>, vector<Point2d> > match(Mat &one, Mat &other, enum descriptor_id descriptor , enum detector_id detector){
     // 1 - Get keypoints and its descriptors in both images
     vector<KeyPoint> keypoints[2];
@@ -187,6 +217,13 @@ pair< vector<Point2d>, vector<Point2d> > match(Mat &one, Mat &other, enum descri
     return pair< vector<Point2d>, vector<Point2d> >(ordered_keypoints[0], ordered_keypoints[1]);
 }
 
+/**
+ * Detect features in image
+ * @param  image     Input image.
+ * @param  det_id    Detector to be used
+ * @param  keypoints Output of keypoints.
+ * @return           Descriptors from image.
+ */
 Mat detectFeatures(Mat image, enum detector_id det_id, vector<KeyPoint> &keypoints){
     // Declare detector
     Ptr<Feature2D> detector;
@@ -265,6 +302,7 @@ bool choleskyDecomp(Mat &A, Mat &D){
     return false;
 }
 
+
 void obtainAB(const Mat &img, const Mat &mult_mat, Mat &A, Mat &B){
     int width = img.cols;
     int height = img.rows;
@@ -311,6 +349,7 @@ Mat crossProductMatrix(Vec3d elem){
 
     return sol.clone();
 }
+
 
 Vec3d maximize(Mat &A, Mat &B){
     Mat D;
