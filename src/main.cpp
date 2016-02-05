@@ -54,6 +54,9 @@ int main(){
     // Get initial guess for z
     Vec3d z = getInitialGuess(A, B, Ap, Bp);
 
+    // Optimizes the z solution
+    optimizeRoot(A, B, Ap, Bp, z);
+
     cout << "z = " << z << endl;
 
     // Get w

@@ -1,10 +1,5 @@
 #include "util.hpp"
 
-/**
- * Gets a string from Mat type to help debugging http://stackoverflow.com/a/17820615/3370561
- * @param  type Mat.type() integer.
- * @return      String like CV_64F or CV_32UC3.
- */
 string type2str(int type) {
   string r;
 
@@ -28,15 +23,7 @@ string type2str(int type) {
   return r;
 }
 
-/**
- * Computes and draw epilines in a stereo pair images.
- * @param  one       First image.
- * @param  other     Second image.
- * @param  num_lines Number of epilines to be drawn.
- * @param  epipole   Output of the epipole.
- * @param  fund_mat  Output of the fundamental mat.
- * @return           Error of the epilines with the correspondences.
- */
+
 double computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole, Mat &fund_mat){
     vector<Point2d> good_matches_1;
     vector<Point2d> good_matches_2;
@@ -119,14 +106,7 @@ double computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipol
      return (distance_1+distance_2)/(2*lines_1.size());
 }
 
-/**
- * Computes fundamental matrix from 2 images
- * @param  one            First image.
- * @param  other          Second image.
- * @param  good_matches_1 Output of good correspondences from one.
- * @param  good_matches_2 Output of good correspondences from other.
- * @return                Fundamental Matrix.
- */
+
 Mat fundamentalMat(Mat &one, Mat &other,
                           vector<Point2d> &good_matches_1,
                           vector<Point2d> &good_matches_2){
@@ -151,14 +131,7 @@ Mat fundamentalMat(Mat &one, Mat &other,
     return F;
 }
 
-/**
- * Match descriptors from two images.
- * @param  one            First image.
- * @param  other          Second image.
- * @param  descriptor     Matcher to be used.
- * @param  detector       Detector to be used.
- * @return                Pair with correspondences.
- */
+
 pair< vector<Point2d>, vector<Point2d> > match(Mat &one, Mat &other, enum descriptor_id descriptor , enum detector_id detector){
     // 1 - Get keypoints and its descriptors in both images
     vector<KeyPoint> keypoints[2];
@@ -205,13 +178,7 @@ pair< vector<Point2d>, vector<Point2d> > match(Mat &one, Mat &other, enum descri
     return pair< vector<Point2d>, vector<Point2d> >(ordered_keypoints[0], ordered_keypoints[1]);
 }
 
-/**
- * Detect features in image
- * @param  image     Input image.
- * @param  det_id    Detector to be used
- * @param  keypoints Output of keypoints.
- * @return           Descriptors from image.
- */
+
 Mat detectFeatures(Mat image, enum detector_id det_id, vector<KeyPoint> &keypoints){
     // Declare detector
     Ptr<Feature2D> detector;
@@ -250,11 +217,7 @@ Mat detectFeatures(Mat image, enum detector_id det_id, vector<KeyPoint> &keypoin
     return descriptors;
 }
 
-/**
- * Shows an image.
- * @param img  Mat object that will be drawn in a new window.
- * @param name Name of the window that will be created.
- */
+
 void draw(Mat img, string name){
     namedWindow( name, WINDOW_AUTOSIZE );
 
@@ -296,12 +259,7 @@ void obtainAB(const Mat &img, const Mat &mult_mat, Mat &A, Mat &B){
     B = mult_mat.t() * pcpct * mult_mat;
 }
 
-/**
- * Returns an antisymmetric matrix representing the cross product with elem.
- * @param  elem Element whose cross product matrix should be computed.
- * @return      A Mat object that represents the antisymmetric matrix associated
- *                with the cross product of the vector elem.
- */
+
 Mat crossProductMatrix(Vec3d elem){
     double values[3][3] = {
         {0, -elem[2], elem[1]},
@@ -314,12 +272,7 @@ Mat crossProductMatrix(Vec3d elem){
     return sol.clone();
 }
 
-/**
- * Maximize paper equations with A,B input
- * @param  A First Mat.
- * @param  B Second Mat.
- * @return   Z vector with max value.
- */
+
 Vec3d maximize(Mat &A, Mat &B){
     Mat D; // Output of cholesky decomposition: upper triangular matrix.
     if( choleskyCustomDecomp(A, D) ){
@@ -354,14 +307,7 @@ Vec3d maximize(Mat &A, Mat &B){
     return Vec3d(0, 0, 0);
 }
 
-/**
- * Get initial guess of z
- * @param  A  A matrix.
- * @param  B  B matrix.
- * @param  Ap A' matrix.
- * @param  Bp B' matrix.
- * @return    Initial guess of z.
- */
+
 Vec3d getInitialGuess(Mat &A, Mat &B, Mat &Ap, Mat &Bp){
 
     Vec3d z_1 = maximize(A, B);
@@ -373,12 +319,7 @@ Vec3d getInitialGuess(Mat &A, Mat &B, Mat &Ap, Mat &Bp){
     return (normalize(z_1) + normalize(z_2))/2;
 }
 
-/**
- * Manual fundamental Mat for paper example
- * @param  good_matches_1 Matches from first image.
- * @param  good_matches_2 Matches from second image.
- * @return                Fundamental Matrix
- */
+
 Mat manualFundMat( vector<Point2d> &good_matches_1,
                     vector<Point2d> &good_matches_2){
     // Taking points by hand
@@ -429,14 +370,7 @@ Mat manualFundMat( vector<Point2d> &good_matches_1,
     return fund_mat;
 }
 
-/**
- * Get the v'_c translation for similarity transform.
- * @param  img_1 First image.
- * @param  img_2 Second image.
- * @param  H_p   First proyection.
- * @param  Hp_p  Second proyection.
- * @return       Translation on Y axis.
- */
+
 double getTranslationTerm(const Mat &img_1, const Mat &img_2, const Mat &H_p, const Mat &Hp_p){
     double min_1 = getMinYCoord(img_1, H_p);
     double min_2 = getMinYCoord(img_2, Hp_p);
@@ -446,12 +380,7 @@ double getTranslationTerm(const Mat &img_1, const Mat &img_2, const Mat &H_p, co
     return -offset;
 }
 
-/**
- * Get min Y coordinate from homographied image.
- * @param  img        Input image.
- * @param  homography Homography.
- * @return            Min Y coordinate.
- */
+
 double getMinYCoord(const Mat &img, const Mat &homography){
     vector<Point2d> corners(4), corners_trans(4);
 
@@ -472,12 +401,7 @@ double getMinYCoord(const Mat &img, const Mat &homography){
     return min_y;
 }
 
-/**
- * Get S from Shearing transform.
- * @param  img        Input image.
- * @param  homography Input homography.
- * @return            S matrix.
- */
+
 Mat getS(const Mat &img, const Mat &homography){
     int w = img.cols;
     int h = img.rows;
@@ -528,15 +452,7 @@ Mat getS(const Mat &img, const Mat &homography){
     return S;
 }
 
-/**
- * Get shearing transform for both images.
- * @param img_1 First image.
- * @param img_2 Second image.
- * @param H_1   First homography.
- * @param H_2   Second homography.
- * @param H_s   H' shearing transform.
- * @param Hp_s  H'_s shearing transform.
- */
+
 void getShearingTransforms(const Mat &img_1, const Mat &img_2,
                            const Mat &H_1, const Mat &H_2,
                            Mat &H_s, Mat &Hp_s){
@@ -646,12 +562,7 @@ void getShearingTransforms(const Mat &img_1, const Mat &img_2,
     cout << "H_s = " << H_s << "\nHp_s = " << Hp_s << endl;
 }
 
-/**
- * Cholesky decomposition.
- * @param  A Input matrix.
- * @param  L Output upper triangular matrix.
- * @return   True if that decomposition exists.
- */
+
 bool choleskyCustomDecomp(const Mat &A, Mat &L){
 
   L = Mat::zeros(3,3,CV_64F);
@@ -687,13 +598,8 @@ bool choleskyCustomDecomp(const Mat &A, Mat &L){
   return true;
 }
 
-/**
- * Checks whether an image is inverted after an homography is applied.
- * @param  img        Image to be tested. Mat object.
- * @param  homography Homography to be applied. Mat object.
- * @return            A boolean value showing whether the image would be inverted
- *                      after the homography is applied.
- */
+
+
 bool isImageInverted(const Mat &img, const Mat &homography){
   vector<Point2d> corners(2), corners_trans(2);
 
@@ -703,4 +609,146 @@ bool isImageInverted(const Mat &img, const Mat &homography){
   perspectiveTransform(corners, corners_trans, homography);
 
   return corners_trans[1].y - corners_trans[0].y < 0.0;
+}
+
+vector< vector<double> > MatToVector(const Mat &mat){
+    vector< vector<double> > array;
+
+    for (size_t i = 0; i < mat.rows; i++) {
+        vector<double> row;
+
+        for (size_t j = 0; j < mat.cols; j++) {
+            row.push_back(mat.at<double>(i,j));
+        }
+
+        array.push_back(row);
+    }
+
+    return array;
+}
+
+
+double function(const Mat &A, const Mat &B,
+                const Mat &Ap, const Mat &Bp,
+                double x){
+    vector< vector<double> > a = MatToVector(A);
+    vector< vector<double> > b = MatToVector(B);
+    vector< vector<double> > ap = MatToVector(Ap);
+    vector< vector<double> > bp = MatToVector(Bp);
+
+    double summ_1 =
+    (2*ap[0][0]*x+ap[1][0]+ap[0][1])/(x*(bp[0][0]*x+bp[0][1])+bp[1][0]*x+bp[1][1]);
+
+    double den_summ_2 = x*(bp[0][0]*x+bp[0][1])+bp[1][0]*x+bp[1][1];
+    den_summ_2 = den_summ_2*den_summ_2;
+
+    double summ_2 =
+    ((2*bp[0][0]*x+bp[1][0]+bp[0][1])*(x*(ap[0][0]*x+ap[0][1])+ap[1][0]*x+ap[1][1]))/den_summ_2;
+
+    double summ_3 =
+    (2*a[0][0]*x+a[1][0]+a[0][1])/(x*(b[0][0]*x+b[0][1])+b[1][0]*x+b[1][1]);
+
+    double den_summ_4 = x*(b[0][0]*x+b[0][1])+b[1][0]*x+b[1][1];
+    den_summ_4 = den_summ_4 * den_summ_4;
+
+    double summ_4 =
+    ((2*b[0][0]*x+b[1][0]+b[0][1])*(x*(a[0][0]*x+a[0][1])+a[1][0]*x+a[1][1]))/den_summ_4;
+
+    return summ_1 - summ_2 + summ_3 - summ_4;
+}
+
+
+double derivative(const Mat &A, const Mat &B,
+                  const Mat &Ap, const Mat &Bp,
+                  double x){
+    vector< vector<double> > a = MatToVector(A);
+    vector< vector<double> > b = MatToVector(B);
+    vector< vector<double> > ap = MatToVector(Ap);
+    vector< vector<double> > bp = MatToVector(Bp);
+
+
+    double summ_1 = (2*ap[0][0])/(x*(bp[0][0]*x+bp[0][1])+bp[1][0]*x+bp[1][1]);
+
+    double den_summ_2 = (x*(bp[0][0]*x+bp[0][1])+bp[1][0]*x+bp[1][1]);
+    den_summ_2 = den_summ_2 * den_summ_2;
+
+    double summ_2 =
+    (2*bp[0][0]*(x*(ap[0][0]*x+ap[0][1])+ap[1][0]*x+ap[1][1]))/den_summ_2;
+
+    double den_summ_3 = (x*(bp[0][0]*x+bp[0][1])+bp[1][0]*x+bp[1][1]);
+    den_summ_3 = den_summ_3 * den_summ_3;
+
+    double summ_3 =
+    (2*(2*ap[0][0]*x+ap[1][0]+ap[0][1])*(2*bp[0][0]*x+bp[1][0]+bp[0][1]))/den_summ_3;
+
+    double den_summ_4 = (x*(bp[0][0]*x+bp[0][1])+bp[1][0]*x+bp[1][1]);
+    den_summ_4 = den_summ_4 * den_summ_4 * den_summ_4;
+
+    double aux_num_summ_4 = (2*bp[0][0]*x+bp[1][0]+bp[0][1]);
+    aux_num_summ_4 = aux_num_summ_4 * aux_num_summ_4;
+
+    double summ_4 =
+    (2*aux_num_summ_4*(x*(ap[0][0]*x+ap[0][1])+ap[1][0]*x+ap[1][1]))/den_summ_4;
+
+    double summ_5 =  (2*a[0][0])/(x*(b[0][0]*x+b[0][1])+b[1][0]*x+b[1][1]);
+
+
+    double den_summ_6 = (x*(b[0][0]*x+b[0][1])+b[1][0]*x+b[1][1]);
+    den_summ_6 = den_summ_6 * den_summ_6;
+
+    double summ_6 =
+    (2*b[0][0]*(x*(a[0][0]*x+a[0][1])+a[1][0]*x+a[1][1]))/den_summ_6;
+
+    double den_summ_7 = (x*(b[0][0]*x+b[0][1])+b[1][0]*x+b[1][1]);
+    den_summ_7 = den_summ_7 * den_summ_7;
+
+    double summ_7 =
+    (2*(2*a[0][0]*x+a[1][0]+a[0][1])*(2*b[0][0]*x+b[1][0]+b[0][1]))/den_summ_7;
+
+    double den_summ_8 = (x*(b[0][0]*x+b[0][1])+b[1][0]*x+b[1][1]);
+    den_summ_8 = den_summ_8 * den_summ_8 * den_summ_8;
+
+    double aux_num_summ_8 = (2*b[0][0]*x+b[1][0]+b[0][1]);
+    aux_num_summ_8 = aux_num_summ_8 * aux_num_summ_8;
+
+    double summ_8 =
+    (2*aux_num_summ_8*(x*(a[0][0]*x+a[0][1])+a[1][0]*x+a[1][1]))/den_summ_8;
+
+    return summ_1 - summ_2 - summ_3 + summ_4 + summ_5 - summ_6 - summ_7 + summ_8;
+}
+
+
+double NewtonRaphson(const Mat &A, const Mat &B,
+                     const Mat &Ap, const Mat &Bp,
+                     double init_guess){
+    double current = init_guess;
+    double previous;
+
+    double fx = function(A,B,Ap,Bp, current);
+    double dfx = derivative(A,B,Ap,Bp, current);
+
+    do {
+        previous = current;
+        current = current - fx / dfx;
+
+        fx = function(A,B,Ap,Bp, current);
+        dfx = derivative(A,B,Ap,Bp, current);
+
+        cout << ROJO << fx << RESET << endl;
+    } while (abs(fx) > 1e-15);
+    // Double-precision values have 15 stable decimal positions
+
+    return current;
+}
+
+
+void optimizeRoot(const Mat &A, const Mat &B,
+                   const Mat &Ap, const Mat &Bp,
+                   Vec3d &z){
+
+    double lambda = z[0];
+
+    z[0] = NewtonRaphson(A,B,Ap,Bp, lambda);
+    z[1] = 1.0;
+    z[2] = 0.0;
 }
