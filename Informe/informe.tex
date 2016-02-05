@@ -1,0 +1,176 @@
+\documentclass[a4paper, 11pt]{article}
+
+%Comandos para configurar el idioma
+\usepackage[spanish,activeacute]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc} %Necesario para el uso de las comillas latinas.
+\usepackage{geometry}
+\usepackage{graphicx}
+
+%Importante que esta sea la última órden del preámbulo
+\usepackage{hyperref}
+
+\newcommand\fnurl[2]{%
+  \href{#2}{#1}\footnote{\url{#2}}%
+}
+
+\newcommand{\includecode}[2][c]{\lstinputlisting[caption=#2, escapechar=, style=custom#1]{#2}<!---->}
+
+%Paquetes matemáticos
+\usepackage{amsmath,amsfonts,amsthm}
+\usepackage[all]{xy} %Para diagramas
+\usepackage{enumerate} %Personalización de enumeraciones
+\usepackage{tikz} %Dibujos
+
+%Tipografía escalable
+\usepackage{lmodern}
+%Legibilidad
+\usepackage{microtype}
+
+%Código
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\definecolor{listinggray}{gray}{0.9}
+\definecolor{lbcolor}{rgb}{0.9,0.9,0.9}
+\lstset{
+backgroundcolor=\color{lbcolor},
+    tabsize=4,
+rulecolor=,
+    language=[GNU]C++,
+        basicstyle=\scriptsize,
+        upquote=true,
+        aboveskip={1.5\baselineskip},
+        columns=fixed,
+        showstringspaces=false,
+        extendedchars=false,
+        breaklines=true,
+        prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+        frame=single,
+        numbers=left,
+        showtabs=false,
+        showspaces=false,
+        showstringspaces=false,
+        identifierstyle=\ttfamily,
+        keywordstyle=\color[rgb]{0,0,1},
+        commentstyle=\color[rgb]{0.026,0.112,0.095},
+        stringstyle=\color[rgb]{0.627,0.126,0.941},
+        numberstyle=\color[rgb]{0.205, 0.142, 0.73},
+%        \lstdefinestyle{C++}{language=C++,style=numbers}’.
+}
+\lstset{
+    backgroundcolor=\color{lbcolor},
+    tabsize=4,
+  language=C++,
+  captionpos=b,
+  tabsize=3,
+  frame=lines,
+  numbers=left,
+  numberstyle=\tiny,
+  numbersep=5pt,
+  breaklines=true,
+  showstringspaces=false,
+  basicstyle=\footnotesize,
+%  identifierstyle=\color{magenta},
+  keywordstyle=\color[rgb]{0,0,1},
+  commentstyle=\color[rgb]{0.026,0.112,0.095}, % Darkgreen
+  stringstyle=\color{red}
+  }
+% Slightly bigger margins than the latex defaults
+
+\geometry{verbose,tmargin=1in,bmargin=1in,lmargin=1in,rmargin=1in}
+\setlength{\parskip}{.5em} % por defecto el espacio entre párrafos es 0pt
+
+\theoremstyle{definition}
+\newtheorem{ejercicio}{Ejercicio}
+\newtheorem{cuestion}{Cuestión}
+\newtheorem*{solucion}{Solución}
+\newtheorem*{bonus}{BONUS}
+
+%%%%%%%% New sqrt
+\usepackage{letltxmacro}
+\makeatletter
+\let\oldr@@t\r@@t
+\def\r@@t#1#2{%
+\setbox0=\hbox{$\oldr@@t#1{#2\,}$}\dimen0=\ht0
+\advance\dimen0-0.2\ht0
+\setbox2=\hbox{\vrule height\ht0 depth -\dimen0}%
+{\box0\lower0.4pt\box2}}
+\LetLtxMacro{\oldsqrt}{\sqrt}
+\renewcommand*{\sqrt}[2][\ ]{\oldsqrt[#1]{#2} }
+\makeatother
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\hypersetup{
+  pdftitle={Informe de proyecto: Implementación del algoritmo de rectificación de Loop \& Zhang},
+  pdfauthor={Antonio Álvarez Caballero, Alejandro García Montoro},
+  unicode,
+  breaklinks=true,  % so long urls are correctly broken across lines
+  colorlinks=true,
+  urlcolor=blue,
+  linkcolor=blue,
+  citecolor=darkgreen,
+  }
+
+\title{Informe de proyecto: \\ Implementación del algoritmo de rectificación de Loop \& Zhang}
+\author{Antonio Álvarez Caballero \\ Alejandro García Montoro \\
+    \href{mailto:analca3@correo.ugr.es}{analca3@correo.ugr.es} \\
+    \href{mailto:agarciamontoro@correo.ugr.es}{agarciamontoro@correo.ugr.es}}
+\date{}
+%%%%%%%%%%%%%%%%% FIN PREAMBULO %%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+  \maketitle
+
+  \section{Descripción del problema}
+
+    E
+
+    \subsection{Subsección}
+      Ejemplo de código
+      \begin{lstlisting}
+        theRNG().state = clock();
+        ...
+
+        bool Camera::isFinite()
+        {
+          // Check if the first 3x3 submatrix is regular
+          Mat M = this->camera(Rect(0,0,3,3));
+          return determinant(M) != 0.0;
+        }
+
+        Camera::Camera(float low, float high)
+        {
+          // Fill 3x4 matrix with zeros
+          this->camera = Mat::zeros(3, 4, CV_32FC1);
+
+          while (!this->isFinite())
+          {
+            // Set this->camera to randon matrix. Random values are uniformly distributed from low to high
+            randu(this->camera,low,high);
+          }
+        }
+      \end{lstlisting}
+
+    \section{Enfoque de la implementación y detalles de eficiencia}
+
+      Sección
+
+    \section{Experimentos realizados}
+
+      Experimentos
+
+    \section{Valoración de resultados}
+
+      Valoración
+
+    \section{Conclusiones}
+
+
+\end{document}
