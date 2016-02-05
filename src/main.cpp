@@ -16,8 +16,15 @@ int main(){
     // Mat img_1 = imread("img/monitogo.png");
     // Mat img_2 = imread("img/monitogo2.png");
 
-    Mat img_1 = imread("/home/antonio/Dropbox/Universidad/Vision por Computador/Foticos/img1.png");
-    Mat img_2 = imread("/home/antonio/Dropbox/Universidad/Vision por Computador/Foticos/img2.png");
+    // Mat img_1 = imread("/home/antonio/Dropbox/Universidad/Vision por Computador/Foticos/img1.png");
+    // Mat img_2 = imread("/home/antonio/Dropbox/Universidad/Vision por Computador/Foticos/img2.png");
+
+    Mat img_1 = imread("/home/alejandro/Documentos/Dropbox/Universidad/Vision por Computador/Foticos/perra_7.jpg");
+    Mat img_2 = imread("/home/alejandro/Documentos/Dropbox/Universidad/Vision por Computador/Foticos/perra_8.jpg");
+
+    // Buenas: madera{1-2}, perra{1-2,7-8,8-9}
+    // Malas: cactus{1-2} madera{3-4,4-5,5-6}, perra{3-4,5-6}
+    // Regulares: cactus{2-3}, nazaries{1-2}, cubo{1-2, 2-3}
 
     Mat fund_mat;
 
@@ -164,10 +171,10 @@ int main(){
 
     char c = 'a';
 
-    while (c != 'q')
-      c = waitKey();
-
-    destroyAllWindows();
+    // while (c != 'q')
+    //   c = waitKey();
+    //
+    // destroyAllWindows();
 
     draw(img_2, "2");
     draw(img_2_dst, "2 proyectada");
