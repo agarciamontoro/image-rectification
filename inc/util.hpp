@@ -70,8 +70,6 @@ void getShearingTransforms(const Mat &img_1, const Mat &img_2,
                           const Mat &H_1, const Mat &H_2,
                           Mat &H_s, Mat &Hp_s);
 
-Mat rectifyPrecisionMatrix(const Mat &A);
-
 bool choleskyCustomDecomp(const Mat &A, Mat &L);
 
 bool isImageInverted(const Mat &img, const Mat &homography);

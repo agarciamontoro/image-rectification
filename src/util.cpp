@@ -23,6 +23,13 @@ string type2str(int type) {
   return r;
 }
 
+/**
+ * Computes the intersection of two lines given their homogeneous coordinates
+ * @param  one   Homogeneous coordinates of the first line as a Vec3d vector.
+ * @param  other Homogeneous coordinates of the second line as a Vec3d vector.
+ * @return       The homogeneous coordinates of the intersection point of the
+ *                   lines one and other.
+ */
 Vec3d lineIntersection(Vec3d one, Vec3d other){
   // Wikipedia info Line-line intersection
     return one.cross(other);
@@ -218,6 +225,11 @@ Mat detectFeatures(Mat image, enum detector_id det_id, vector<KeyPoint> &keypoin
     return descriptors;
 }
 
+/**
+ * Shows an image.
+ * @param img  Mat object that will be drawn in a new window.
+ * @param name Name of the window that will be created.
+ */
 void draw(Mat img, string name){
     namedWindow( name, WINDOW_AUTOSIZE );
 
@@ -282,6 +294,12 @@ void obtainAB(const Mat &img, const Mat &mult_mat, Mat &A, Mat &B){
     B = mult_mat.t() * pcpct * mult_mat;
 }
 
+/**
+ * Returns an antisymmetric matrix representing the cross product with elem.
+ * @param  elem Element whose cross product matrix should be computed.
+ * @return      A Mat object that represents the antisymmetric matrix associated
+ *                with the cross product of the vector elem.
+ */
 Mat crossProductMatrix(Vec3d elem){
     double values[3][3] = {
         {0, -elem[2], elem[1]},
@@ -589,51 +607,6 @@ void getShearingTransforms(const Mat &img_1, const Mat &img_2,
     cout << "H_s = " << H_s << "\nHp_s = " << Hp_s << endl;
 }
 
-Mat rectifyPrecisionMatrix(const Mat &A){
-  Mat eigenvalues, eigenvectors;
-
-  eigen(A, eigenvalues, eigenvectors);
-  cout << "Rectifyyyyyyng" << endl;
-
-  Mat P(3,3, CV_64F);
-
-  cout << "values " << eigenvectors << endl;
-
-  eigenvectors.row(0).copyTo(P.row(0));
-  eigenvectors.row(1).copyTo(P.row(1));
-  eigenvectors.row(2).copyTo(P.row(2));
-
-  P = P.t();
-
-  Mat D = Mat::zeros(3,3, CV_64F);
-
-  for (int i = 0; i < 3; i++) {
-    double value = eigenvalues.at<double>(i,0);
-    if (value > -1e-6 && value < 0.0)
-      D.at<double>(i,i) = -value;
-    else
-      D.at<double>(i,i) = value;
-  }
-
-  Mat res = P * D * P.inv();
-
-  for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 3; j++) {
-      double value = res.at<double>(i,j);
-      if (fabs(value) > 1e-6)
-        res.at<double>(i,j) = value;
-      else
-        res.at<double>(i,j) = 0.0;
-      }
-  }
-
-
-  cout << "Rectify A = " << A << endl;
-  cout << "Res = " << res << endl;
-
-  return res.clone();
-}
-
 
 bool choleskyCustomDecomp(const Mat &A, Mat &L){
 
@@ -670,6 +643,13 @@ bool choleskyCustomDecomp(const Mat &A, Mat &L){
   return true;
 }
 
+/**
+ * Checks whether an image is inverted after an homography is applied.
+ * @param  img        Image to be tested. Mat object.
+ * @param  homography Homography to be applied. Mat object.
+ * @return            A boolean value showing whether the image would be inverted
+ *                      after the homography is applied.
+ */
 bool isImageInverted(const Mat &img, const Mat &homography){
   vector<Point2d> corners(2), corners_trans(2);
 
