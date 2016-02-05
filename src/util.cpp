@@ -808,18 +808,21 @@ double NewtonRaphson(const Mat &A, const Mat &B,
                      const Mat &Ap, const Mat &Bp,
                      double init_guess){
     double current = init_guess;
-    double previous, fx, dfx;
+    double previous;
 
-    int i = 1;
+    double fx = function(A,B,Ap,Bp, current);
+    double dfx = derivative(A,B,Ap,Bp, current);
+
     do {
+        previous = current;
+        current = current - fx / dfx;
+
         fx = function(A,B,Ap,Bp, current);
         dfx = derivative(A,B,Ap,Bp, current);
 
-        previous = current;
-        current = current - fx / dfx;
-        cout << ROJO << previous << ", " << current << RESET << endl;
-        i++;
-    } while (abs(previous-current) > 1e-20);
+        cout << ROJO << fx << RESET << endl;
+    } while (abs(fx) > 1e-15);
+    // Double-precision values have 15 stable decimal positions
 
     return current;
 }
