@@ -75,7 +75,7 @@ double computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipol
         Vec3d line_2 = lines_2[i];
 
         // Draws only num_lines lines
-        if(true){//i % (lines_1.size()/num_lines) == 0 ){
+        if(i % (lines_1.size()/num_lines) == 0 ){
             Scalar color(rng.uniform(0, 255),
                          rng.uniform(0, 255),
                          rng.uniform(0, 255));
