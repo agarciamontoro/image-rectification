@@ -48,6 +48,9 @@ int main(){
     cout << "Ap = " << Ap << endl;
     cout << "Bp = " << Bp << endl << endl;
     Vec3d z = getInitialGuess(A, B, Ap, Bp);
+    
+    cout << "z = " << z << endl;
+    optimizeRoot(A, B, Ap, Bp, z);
 
     cout << "z = " << z << endl;
 

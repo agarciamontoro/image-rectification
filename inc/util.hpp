@@ -74,4 +74,8 @@ bool choleskyCustomDecomp(const Mat &A, Mat &L);
 
 bool isImageInverted(const Mat &img, const Mat &homography);
 
+void optimizeRoot(const Mat &A, const Mat &B,
+                  const Mat &Ap, const Mat &Bp,
+                  Vec3d &z);
+
 #endif

@@ -699,3 +699,138 @@ bool isImageInverted(const Mat &img, const Mat &homography){
 
   return corners_trans[1].y - corners_trans[0].y < 0.0;
 }
+
+vector< vector<double> > MatToVector(const Mat &mat){
+    vector< vector<double> > array;
+
+    for (size_t i = 0; i < mat.rows; i++) {
+        vector<double> row;
+
+        for (size_t j = 0; j < mat.cols; j++) {
+            row.push_back(mat.at<double>(i,j));
+        }
+
+        array.push_back(row);
+    }
+
+    return array;
+}
+
+double function(const Mat &A, const Mat &B,
+                const Mat &Ap, const Mat &Bp,
+                double x){
+    vector< vector<double> > a = MatToVector(A);
+    vector< vector<double> > b = MatToVector(B);
+    vector< vector<double> > ap = MatToVector(Ap);
+    vector< vector<double> > bp = MatToVector(Bp);
+
+    double summ_1 =
+    (2*ap[0][0]*x+ap[1][0]+ap[0][1])/(x*(bp[0][0]*x+bp[0][1])+bp[1][0]*x+bp[1][1]);
+
+    double den_summ_2 = x*(bp[0][0]*x+bp[0][1])+bp[1][0]*x+bp[1][1];
+    den_summ_2 = den_summ_2*den_summ_2;
+
+    double summ_2 =
+    ((2*bp[0][0]*x+bp[1][0]+bp[0][1])*(x*(ap[0][0]*x+ap[0][1])+ap[1][0]*x+ap[1][1]))/den_summ_2;
+
+    double summ_3 =
+    (2*a[0][0]*x+a[1][0]+a[0][1])/(x*(b[0][0]*x+b[0][1])+b[1][0]*x+b[1][1]);
+
+    double den_summ_4 = x*(b[0][0]*x+b[0][1])+b[1][0]*x+b[1][1];
+    den_summ_4 = den_summ_4 * den_summ_4;
+
+    double summ_4 =
+    ((2*b[0][0]*x+b[1][0]+b[0][1])*(x*(a[0][0]*x+a[0][1])+a[1][0]*x+a[1][1]))/den_summ_4;
+
+    return summ_1 - summ_2 + summ_3 - summ_4;
+}
+
+double derivative(const Mat &A, const Mat &B,
+                  const Mat &Ap, const Mat &Bp,
+                  double x){
+    vector< vector<double> > a = MatToVector(A);
+    vector< vector<double> > b = MatToVector(B);
+    vector< vector<double> > ap = MatToVector(Ap);
+    vector< vector<double> > bp = MatToVector(Bp);
+
+
+    double summ_1 = (2*ap[0][0])/(x*(bp[0][0]*x+bp[0][1])+bp[1][0]*x+bp[1][1]);
+
+    double den_summ_2 = (x*(bp[0][0]*x+bp[0][1])+bp[1][0]*x+bp[1][1]);
+    den_summ_2 = den_summ_2 * den_summ_2;
+
+    double summ_2 =
+    (2*bp[0][0]*(x*(ap[0][0]*x+ap[0][1])+ap[1][0]*x+ap[1][1]))/den_summ_2;
+
+    double den_summ_3 = (x*(bp[0][0]*x+bp[0][1])+bp[1][0]*x+bp[1][1]);
+    den_summ_3 = den_summ_3 * den_summ_3;
+
+    double summ_3 =
+    (2*(2*ap[0][0]*x+ap[1][0]+ap[0][1])*(2*bp[0][0]*x+bp[1][0]+bp[0][1]))/den_summ_3;
+
+    double den_summ_4 = (x*(bp[0][0]*x+bp[0][1])+bp[1][0]*x+bp[1][1]);
+    den_summ_4 = den_summ_4 * den_summ_4 * den_summ_4;
+
+    double aux_num_summ_4 = (2*bp[0][0]*x+bp[1][0]+bp[0][1]);
+    aux_num_summ_4 = aux_num_summ_4 * aux_num_summ_4;
+
+    double summ_4 =
+    (2*aux_num_summ_4*(x*(ap[0][0]*x+ap[0][1])+ap[1][0]*x+ap[1][1]))/den_summ_4;
+
+    double summ_5 =  (2*a[0][0])/(x*(b[0][0]*x+b[0][1])+b[1][0]*x+b[1][1]);
+
+
+    double den_summ_6 = (x*(b[0][0]*x+b[0][1])+b[1][0]*x+b[1][1]);
+    den_summ_6 = den_summ_6 * den_summ_6;
+
+    double summ_6 =
+    (2*b[0][0]*(x*(a[0][0]*x+a[0][1])+a[1][0]*x+a[1][1]))/den_summ_6;
+
+    double den_summ_7 = (x*(b[0][0]*x+b[0][1])+b[1][0]*x+b[1][1]);
+    den_summ_7 = den_summ_7 * den_summ_7;
+
+    double summ_7 =
+    (2*(2*a[0][0]*x+a[1][0]+a[0][1])*(2*b[0][0]*x+b[1][0]+b[0][1]))/den_summ_7;
+
+    double den_summ_8 = (x*(b[0][0]*x+b[0][1])+b[1][0]*x+b[1][1]);
+    den_summ_8 = den_summ_8 * den_summ_8 * den_summ_8;
+
+    double aux_num_summ_8 = (2*b[0][0]*x+b[1][0]+b[0][1]);
+    aux_num_summ_8 = aux_num_summ_8 * aux_num_summ_8;
+
+    double summ_8 =
+    (2*aux_num_summ_8*(x*(a[0][0]*x+a[0][1])+a[1][0]*x+a[1][1]))/den_summ_8;
+
+    return summ_1 - summ_2 - summ_3 + summ_4 + summ_5 - summ_6 - summ_7 + summ_8;
+}
+
+double NewtonRaphson(const Mat &A, const Mat &B,
+                     const Mat &Ap, const Mat &Bp,
+                     double init_guess){
+    double current = init_guess;
+    double previous, fx, dfx;
+
+    int i = 1;
+    do {
+        fx = function(A,B,Ap,Bp, current);
+        dfx = derivative(A,B,Ap,Bp, current);
+
+        previous = current;
+        current = current - fx / dfx;
+        cout << ROJO << previous << ", " << current << RESET << endl;
+        i++;
+    } while (abs(previous-current) > 1e-20);
+
+    return current;
+}
+
+void optimizeRoot(const Mat &A, const Mat &B,
+                   const Mat &Ap, const Mat &Bp,
+                   Vec3d &z){
+
+    double lambda = z[0];
+
+    z[0] = NewtonRaphson(A,B,Ap,Bp, lambda);
+    z[1] = 1.0;
+    z[2] = 0.0;
+}
