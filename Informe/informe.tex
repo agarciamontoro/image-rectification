@@ -79,6 +79,7 @@
     keywordstyle=\color[rgb]{0,0,1},
     commentstyle=\color[rgb]{0.026,0.112,0.095}, % Darkgreen
     stringstyle=\color{red},
+    escapeinside={(*@}{@*)}
 }
 % Slightly bigger margins than the latex defaults
 
@@ -203,7 +204,156 @@
 
     Buscamos por tanto unas líneas $w$ y $w'$ que consigan que los pesos $\omega_i$ se parezcan todo lo posible.
 
-    Toda la discusión matemática se encuentra en \cite{LoopZhang}, pero
+    Toda la discusión matemática se encuentra descrita en \cite{LoopZhang}, transformando el problema propuesto en la minimización de la siguiente expresión:
+    \begin{equation}
+        \frac{z^TAz}{z^TBz} + \frac{z^TA'z}{z^TB'z}
+        \label{eq_minz}
+    \end{equation}
+
+    donde las matrices $A$, $B$ y sus homólogas con primas son conocidas y el vector $z = [\lambda, 1, 0]$ depende de un único parámetro $\lambda$ y es tal que $w = [e]_times z$ y $w' = Fz$.
+
+    El cálculo de las matrices $A$, $B$, $A'$ y $B'$ depende únicamente de por qué matriz se multiplica: $[e]_\times$ si queremos calcular $A$ y $B$ o la matriz fundamental $F$ si queremos calcular $A$ y $B$:
+    \begin{align*}
+        A = [e]_\times^T P P^T [e]_\times && A' = F^T P' P'^T F \\
+        B = [e]_\times^T p_c p_c^T [e]_\times && B' = F^T p_c' p_c'^T F
+    \end{align*}
+
+    Este cálculo se encuentra implementado en la siguiente función, donde la matriz \lstinline{mult_mat} representa $[e]_\times$ o $F$ según si queremos calcular las versiones normales o las primas:
+    \begin{lstlisting}
+    void obtainAB(const Mat &img, const Mat &mult_mat, Mat &A, Mat &B){
+        int width = img.cols;
+        int height = img.rows;
+
+        int size = 3;
+
+        Mat PPt = Mat::zeros(size, size, CV_64F);
+
+        PPt.at<double>(0,0) = width*width - 1;
+        PPt.at<double>(1,1) = height*height - 1;
+
+        PPt *= (width*height) / 12.0;
+
+        double w_1 = width - 1;
+        double h_1 = height - 1;
+
+        double values[3][3] = {
+            {w_1*w_1, w_1*h_1, 2*w_1},
+            {w_1*h_1, h_1*h_1, 2*h_1},
+            {2*w_1, 2*h_1, 4}
+        };
+
+        Mat pcpct(size, size, CV_64F, values);
+
+        pcpct /= 4;
+        A = mult_mat.t() * PPt * mult_mat;
+        B = mult_mat.t() * pcpct * mult_mat;
+    }
+    \end{lstlisting}
+
+    Desarrollando la expresión descrita en \ref{eq_minz} obtenemos un polinomio en $\lambda$ cuyo mínimo es el valor que buscamos. Este mínimo se alcanza cuando su derivada con respecto a $\lambda$ es cero, así que todo nuestro problema se reduce a encontrar esta raíz.
+
+    En \cite{LoopZhang} se da una primera aproximación a esta raíz, cuyo cálculo consiste en minimizar por separado ambos sumandos y tomar la media normalizada de las dos soluciones.
+
+    De nuevo, allí se encuentra toda la discusión matemática, que se reduce a hacer lo siguiente para ambos sumandos:
+    \begin{itemize}
+        \item Hacer la descomposición de Cholesky de la matriz $A$ (resp. $A'$) ---que es simétrica y definida positiva--- para obtener una matriz triangular superior $D$ tal que $A = D^TD$  (resp. $A' = D'^TD'$).
+        \item Encontrar el vector propio $y$ (resp. $y'$) asociado al mayor valor propio de $(D^{-1})^T B D^{-1}$ (resp. $(D'^{-1})^T B' D'^{-1}$).
+        \item Tomar $z_1 = D^{-1}y$ (resp. $z_2 = D'^{-1}y'$)
+    \end{itemize}
+
+    Se toma entonces como primera aproximación a la raíz el siguiente vector:
+    \[
+    \frac{1}{2}\left(\frac{z_1}{\lVert z_1 \rVert} + \frac{z_2}{\lVert z_2 \rVert}\right)
+    \]
+
+    Toda este cálculo se encuentra implementado en la siguiente función:
+    \begin{lstlisting}
+    Vec3d getInitialGuess(Mat &A, Mat &B, Mat &Ap, Mat &Bp){
+
+        Vec3d z_1 = maximize(A, B);
+        Vec3d z_2 = maximize(Ap, Bp);
+
+        return (normalize(z_1) + normalize(z_2))/2;
+    }
+    \end{lstlisting}
+
+    donde el código realmente interesante está en \lstinline{maximize}:
+    \begin{lstlisting}
+    Vec3d maximize(Mat &A, Mat &B){
+        Mat D; // Output of cholesky decomposition: upper triangular matrix.
+        if( choleskyCustomDecomp(A, D) ){
+
+            Mat D_inv = D.inv();
+
+            Mat DBD = D_inv.t() * B * D_inv;
+
+            // Solve the equations system using eigenvalue decomposition
+
+            Mat eigenvalues, eigenvectors;
+            eigen(DBD, eigenvalues, eigenvectors);
+
+            // Take largest eigenvector
+            Mat y = eigenvectors.row(0);
+
+            Mat sol = D_inv*y.t();
+
+            Vec3d res(sol.at<double>(0,0), sol.at<double>(1,0), sol.at<double>(2,0));
+
+            return res;
+        }
+
+        // At this point, there is an error!
+        Mat eigenvalues;
+        eigen(A, eigenvalues);
+
+        cout << "\n\n\n----------------------------- WARNING -----------------------" << endl;
+
+        return Vec3d(0, 0, 0);
+    }
+    \end{lstlisting}
+
+    Aunque \emph{OpenCV} pone a disposición del usuario una función que realiza el cálculo de la descomposición de Cholesky, su uso en este trabajo introducía errores de redondeo que impedían realizar la descomposición. En ocasiones calculaba valores propios muy cercanos a cero ---del orden de $10^{-5}$--- que tomaba como negativos, comprobando entonces erróneamente que la matriz $A$ no era definida positiva.
+
+    Para evitar estos fallos y tener total control sobre los cálculos, decidimos implementar una función propia que calculara esta descomposición. La función es la que sigue, e implementa las fórmulas descritas en \cite{wikiChol}.
+    \begin{lstlisting}
+    bool choleskyCustomDecomp(const Mat &A, Mat &L){
+
+      L = Mat::zeros(3,3,CV_64F);
+
+      for (int i = 0; i < 3; i++){
+        for (int j = 0; j <= i; j++){
+          double sum = 0;
+          for (int k = 0; k < j; k++){
+            sum += L.at<double>(i,k) * L.at<double>(j,k);
+          }
+
+          L.at<double>(i,j) = A.at<double>(i,j) - sum;
+          if (i == j){
+            if (L.at<double>(i,j) < 0.0){
+              if (L.at<double>(i,j) > -1e-5){
+                L.at<double>(i,j) *= -1; (*@\label{comprobacion}@*)
+              }
+              else{
+                return false;
+              }
+            }
+            L.at<double>(i,j) = sqrt(L.at<double>(i,j));
+          }
+          else{
+            L.at<double>(i,j) /= L.at<double>(j,j);
+          }
+        }
+      }
+
+      L = L.t();
+
+      return true;
+    }
+    \end{lstlisting}
+
+    La línea \ref{comprobacion} es la que evita los errores de redondeo descritos anteriormente. Cuando se intenta realizar la raíz cuadrada de un elemento, primero se comprueba si es negativo. En caso de serlo, se debe lanzar un fallo, a no ser que el valor sea muy cercano a cero; en esa situación, simplemente tomamos el valor opuesto y seguimos el algoritmo con naturalidad.
+
+    En este punto del proceso tenemos una primera aproximación a la raíz que necesitamos, muy cercana a la real según \cite{LoopZhang} pero que puede ser optimizada.
 
     \subsection{Transformación de semejanza}
     Euclídea
