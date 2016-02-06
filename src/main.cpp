@@ -127,7 +127,7 @@ int main(){
     Mat Hp = Hp_s * Hp_r * Hp_p;
 
 
-            // Get homography image of the corner coordinates from all the images to obtain mosaic size
+            // Get homography image of the corner coordinates from all the images
             vector<Point2d> corners_all(4), corners_all_t(4);
             double min_x, min_y, max_x, max_y;
             min_x = min_y = +INF;
@@ -151,7 +151,7 @@ int main(){
             int img_1_cols = max_x - min_x;
             int img_1_rows = max_y - min_y;
 
-            // Get homography image of the corner coordinates from all the images to obtain mosaic size
+            // Get homography image of the corner coordinates from all the images
             min_x = min_y = +INF;
             max_x = max_y = -INF;
 

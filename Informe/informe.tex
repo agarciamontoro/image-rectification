@@ -20,6 +20,8 @@
 
 \newcommand{\includecode}[2][c]{\lstinputlisting[caption=#2, escapechar=, style=custom#1]{#2}<!---->}
 
+\newcommand{\sectionbreak}{\clearpage}
+
 %Paquetes matemáticos
 \usepackage{amsmath,amsfonts,amsthm}
 \usepackage[all]{xy} %Para diagramas
@@ -149,7 +151,7 @@
     Es de hecho este último criterio el que hace del algoritmo una de las mejores soluciones actuales, ya que se consigue una rectificación que mantiene casi todas las propiedades de las imágenes originales.
 
 
-    \section{Enfoque de la implementación y detalles de eficiencia}
+    \section{Descripción de la solución implementada}
 
     La implementación del algoritmo se basa en la descomposición de la homografía $H$ que se quiere obtener en las siguientes transformaciones:
     \begin{itemize}
@@ -450,12 +452,403 @@
     En este momento tenemos sendas homorgafías $H_p$ y $H'_p$, tan cercanas a una homorgafía afín como es posible, que transforman los epipolos $e$ y $e'$ a puntos del infinito.
 
     \subsection{Transformación de semejanza}
+    Las homografías $H_r$ y $H'_r$ simplemente rotan el epipolo de su posición tras aplicar la homografía proyectiva a una posición alineada con la dirección $[1, 0, 0]$. Además, aplican un desplazamiento vertical a ambas imágenes para que las líneas epipolares correspondientes tengan la misma coordenada vertical.
+
+    Para el cálculo de las homografías $H_r$ y $H'_r$ sólo tenemos una incógnita: el desplazamiento vertical que hay que aplicarle a ambas imágenes para mantenerlas en un sistema de coordenadas correcto.
+
+    Esto es así porque la homografía $H_r$ ---y su homóloga $H'_r$---, una vez conocidas las líneas $w$ y $w'$ están definidas como sigue:
+    \[
+    H_r = \begin{pmatrix}
+        F_{32} - w_b F_{33} & w_a F_{33} - F_{31} & 0 \\
+        F_{31} - w_a F_{33} & F_{32} - w_b F_{33} & F_{33} + v'_c \\
+        0 & 0 & 1
+    \end{pmatrix} \;\;\;\;
+    H'_r = \begin{pmatrix}
+        w'_b F_{33} - F_{23} & F_{13} - w'_a F_{33} & 0 \\
+        w'_a F_{33} - F_{13} & w'_b F_{33} - F_{23} & v'_c \\
+        0 & 0 & 1
+    \end{pmatrix}
+    \]
+
+    De ahí desconocemos únicamente $v'_c$, y este valor se toma de manera que la menor coordenada vertical de cualquier punto de las imágenes tras aplicar $H_p$ (resp. $H'_p$) sea cero.
+
+    La idea por tanto es la siguiente: aplicamos $H_p$ a las esquinas de la primera imagen, $H'_p$ a las esquinas de la segunda y calculamos la menor coordenada vertical de los dos conjuntos de esquinas proyectadas. El opuesto de este valor será la traslación que haya que hacer para que la mínima coordenada vertical sea cero.
+
+    La siguiente función encapsula este algoritmo:
+    \begin{lstlisting}
+    double getTranslationTerm(const Mat &img_1, const Mat &img_2, const Mat &H_p, const Mat &Hp_p){
+        double min_1 = getMinYCoord(img_1, H_p);
+        double min_2 = getMinYCoord(img_2, Hp_p);
+
+        double offset = min_1 < min_2 ? min_1 : min_2;
+
+        return -offset;
+    }
+    \end{lstlisting}
+    donde la función realmente interesante, \lstinline{getMinYCoord}, está implementada como sigue:
+    \begin{lstlisting}
+    double getMinYCoord(const Mat &img, const Mat &homography){
+        vector<Point2d> corners(4), corners_trans(4);
+
+        corners[0] = Point2d(0,0);
+        corners[1] = Point2d(img.cols,0);
+        corners[2] = Point2d(img.cols,img.rows);
+        corners[3] = Point2d(0,img.rows);
+
+        perspectiveTransform(corners, corners_trans, homography);
+
+        double min_y;
+        min_y = +INF;
+
+        for (int j = 0; j < 4; j++) {
+            min_y = min(corners_trans[j].y, min_y);
+        }
+
+        return min_y;
+    }
+    \end{lstlisting}
+
+    Esta función simplemente define las cuatro esquinas como \lstinline{Point2d}, las guarda en un vector y se lo pasa a la función de \emph{OpenCV} \lstinline{perspectiveTransform}, que aplica la homografía pasada como último argumento a todos los puntos del vector suministrado. Por último, se devuelve la mínima coordenada vertical.
+
+    Con la traslación $v'_c$ calculada, basta entonces construir las matrices $H_r$ y $H'_r$ tal y como se calcularon:
+    \begin{lstlisting}
+    // Get the translation term
+    double vp_c = getTranslationTerm(img_1, img_2, H_p, Hp_p);
+
+    cout << "vp_c = " << vp_c << endl;
+
+    // Get the H_r and Hp_r matrix directly
+    Mat H_r = Mat::zeros(3, 3, CV_64F);
+
+    H_r.at<double>(0,0) = fund_mat.at<double>(2,1) - w.at<double>(1,0) * fund_mat.at<double>(2,2);
+    H_r.at<double>(1,0) = fund_mat.at<double>(2,0) - w.at<double>(0,0) * fund_mat.at<double>(2,2);
+
+    H_r.at<double>(0,1) = w.at<double>(0,0) * fund_mat.at<double>(2,2) - fund_mat.at<double>(2,0);
+    H_r.at<double>(1,1) = H_r.at<double>(0,0);
+
+    H_r.at<double>(1,2) = fund_mat.at<double>(2,2) + vp_c;
+    H_r.at<double>(2,2) = 1.0;
+
+    Mat Hp_r = Mat::zeros(3, 3, CV_64F);
+
+    Hp_r.at<double>(0,0) = wp.at<double>(1,0) * fund_mat.at<double>(2,2) - fund_mat.at<double>(1,2);
+    Hp_r.at<double>(1,0) = wp.at<double>(0,0) * fund_mat.at<double>(2,2) - fund_mat.at<double>(0,2);
+
+    Hp_r.at<double>(0,1) = fund_mat.at<double>(0,2) - wp.at<double>(0,0) * fund_mat.at<double>(2,2);
+    Hp_r.at<double>(1,1) = Hp_r.at<double>(0,0);
+
+    Hp_r.at<double>(1,2) = vp_c;
+    Hp_r.at<double>(2,2) = 1.0;
+    \end{lstlisting}
 
     \subsection{Transformación de cizalla}
+    Laa composiciones $H_r H_p$ y $H'_r H'_p$ culminan el algoritmo de rectificación, ya que alinean los epipolos en la dirección $[1, 0, 0]$; es decir, dejan las líneas epipolares horizontales, paralelas entre sí y a la misma altura.
+
+    Sin embargo, la distorsión introducida por las transformaciones proyectivas puede ser reducida, y esto se consigue con una transformación de cizalla que pretende conservar la perpendicularidad y la proporcionalidad de las líneas que unen los puntos medios de los bordes de la imagen. Además, se calcula una escala y una traslación en ambos ejes ---con la restricción de que la traslación vertical debe ser igual en ambas imágenes para que las líneas epipolares sigan alineadas--- para mantener las imágenes aproximadamente con las mismas áreas y en un sistema de coordenadas razonable.
+
+    \subsubsection{Reducción de la distorsión}
+    Con las restricciones de perpendicularidad y proporcionalidad se puede calcular la transformación de cizalla $S$.
+
+    De nuevo, toda la discusión matemática se puede encontrar en \cite{LoopZhang}, donde el problema se reduce a encontrar una solución común a dos cuárticas en las incógnitas $a$ y $b$. En \cite{LoopZhang} se da la solución salvo signo, indicando que la solución en la que $a$ es positiva es la preferida. Así, basta implementar las expresiones de $a$ y $b$ dadas en el artículo y, si $a$ es negativo, cambiar ambos signos.
+
+    Este cálculo se encuentra en la función \lstinline{getS}, que sigue la misma notación que \cite{LoopZhang}:
+    \begin{lstlisting}
+    Mat getS(const Mat &img, const Mat &homography){
+        int w = img.cols;
+        int h = img.rows;
+
+        Point2d a((w-1)/2, 0); (*@\label{defpuntos}@*)
+        Point2d b(w-1, (h-1)/2);
+        Point2d c((w-1)/2, h-1);
+        Point2d d(0, (h-1)/2);
+
+        vector<Point2d> midpoints, midpoints_hat;
+        midpoints.push_back(a);
+        midpoints.push_back(b);
+        midpoints.push_back(c);
+        midpoints.push_back(d);
+
+        perspectiveTransform(midpoints, midpoints_hat, homography); (*@\label{proyeccionpuntos}@*)
+
+        Point2d x = midpoints_hat[1] - midpoints_hat[3];
+        Point2d y = midpoints_hat[2] - midpoints_hat[0];
+
+        double coeff_a = (h*h*x.y*x.y + w*w*y.y*y.y) / (h*w * (x.y*y.x - x.x*y.y));
+        double coeff_b = (h*h*x.x*x.y + w*w*y.x*y.y) / (h*w * (x.x*y.y - x.y*y.x));
+
+        Mat S = Mat::eye(3, 3, CV_64F);
+        S.at<double>(0,0) = coeff_a;
+        S.at<double>(0,1) = coeff_b;
+
+        Vec3d x_hom(x.x, x.y, 0.0);
+        Vec3d y_hom(y.x, y.y, 0.0);
+
+        if( coeff_a < 0 ){ (*@\label{signo}@*)
+            coeff_a *= -1;
+            coeff_b *= -1;
+
+            S.at<double>(0,0) = coeff_a;
+            S.at<double>(0,1) = coeff_b;
+        }
+
+        Mat EQ18 = (S * Mat(x_hom)).t() * (S * Mat(y_hom)); (*@\label{solucion}@*)
+        cout << ROJO << "EQ18 " << EQ18 << RESET << endl;
+
+        Mat EQ19 = ((S * Mat(x_hom)).t() * (S * Mat(x_hom))) / ((S * Mat(y_hom)).t() * (S * Mat(y_hom))) - (1.*w*w)/(1.*h*h);
+        cout << ROJO << "EQ19 " << EQ19 << RESET << endl;
+
+        cout << "S = " << S << endl;
+
+        return S;
+    }
+    \end{lstlisting}
+
+    En la línea \ref{defpuntos} se definen los puntos medios de la imagen, se proyectan con la homografía calculada hasta ahora en \ref{proyeccionpuntos} y, después, se definen las soluciones $a$ y $b$ tal y como se declara en el artículo.
+
+    Para obtener la solución en la que $a$ es positivo, basta ver si no se cumple esta restricción y, en ese caso, tomar $-a$ y $-b$.
+
+    Hemos añadido por último, a partir de la línea \ref{solucion}, que los valores calculados sean realmente soluciones. Así, implementamos las expresiones 18 y 19 de \cite{LoopZhang} e imprimimos los resultados, que deben ser cero. En efecto, se obtienen valores del orden de $10^{-6}$, como veremos en la valoración de los resultados.
+
+    \subsubsection{Escalado y traslación}
+    Las composiciones $S H_r H_p$ y $S' H'_r H'_p$ culminan el algoritmo de rectificación minimizando la distorsión. Sin embargo, hay que aplicar un escalado y una traslación de manera que mantengamos áreas y sistemas de coordenadas parecidos a los originales.
+
+    Mientras se aplique el mismo factor de escala a ambas imágenes y la traslación vertical sea igual, hay libertad para escoger estos valores.
+
+    Tal y como se indica en \cite{LoopZhang}, uno de los criterios para el cálculo del factor de escala puede ser el de mantener la suma de las áreas de ambas imágenes. Así se ha implementado en este proyecto, aunque se ha impuesto una nueva restricción\footnote{Esta decisión de implementación se tomó tras la fase de prueba, donde comprobamos que había casos en los que la rectificación funcionaba bien pero giraba $180\degree$ las imágenes.}: la transformación no puede invertir la imagen.
+
+    Para mantener el cálculo de las áreas se sigue el siguiente proceso:
+    \begin{itemize}
+        \item Se calcula $A$, suma de las áreas de las imágenes originales.
+        \item Se aplica homografía $S H_r H_p$ (resp. $S' H'_r H'_p$) a las esquinas de las imágenes originales y se obtienen sus proyectadas
+        \item Se calcula $A'$, área del contorno definido por las cuatro esquinas proyectadas.
+        \item Se toma como factor de escala $s = \sqrt{\frac{A}{A'}}$.
+    \end{itemize}
+
+    Definimos entonces la matriz $W_2$ como un escalado con ese factor de escala:
+    \[
+    W_2 = \begin{pmatrix}
+        s & 0 & 0 \\
+        0 & s & 0 \\
+        0 & 0 & 1
+    \end{pmatrix}
+    \]
+
+    Después de comprobar si la homografía $W_2 S H_r H_p$ invierte la imagen ---y, en caso afirmativo, redefinir $W_2$ con $-s$ como factor de escala---, se calcula una traslación horizontal $x$ y $x'$ independiente en cada imagen ---de manera que la menor coordenada horizontal sea cero--- y una traslación vertical común $y$ ---de forma que la menor coordenada vertical de ambas imágenes sea cero---. Con estas traslaciones se define entonces $W_1$ y $W'_1$ como sigue:
+    \[
+    W_1 = \begin{pmatrix}
+        1 & 0 & x \\
+        0 & 1 & y \\
+        0 & 0 & 1
+    \end{pmatrix}\;\;\;\;
+    W'_1 = \begin{pmatrix}
+        1 & 0 & x' \\
+        0 & 1 & y \\
+        0 & 0 & 1
+    \end{pmatrix}
+    \]
+
+    Tomaremos entonces las transformaciones $H_s$ y $H'_s$ como
+    \[
+    H_s = W_1 W_2 S\;\;\;\;\;\;
+    H'_s = W'_1 W_2 S'
+    \]
+
+    Todo este proceso ---incluendo el cálculo de $S$--- se encuentra implementado en la siguiente función:
+
+    \begin{lstlisting}
+    void getShearingTransforms(const Mat &img_1, const Mat &img_2,
+                               const Mat &H_1, const Mat &H_2,
+                               Mat &H_s, Mat &Hp_s){
+
+        Mat S = getS(img_1, H_1);
+        Mat Sp = getS(img_2, H_2);
+
+        double A = img_1.cols*img_1.rows + img_2.cols*img_2.rows;
+        double Ap = 0;
+
+        vector<Point2f> corners(4), corners_trans(4);
+
+        corners[0] = Point2f(0,0);
+        corners[1] = Point2f(img_1.cols,0);
+        corners[2] = Point2f(img_1.cols,img_1.rows);
+        corners[3] = Point2f(0,img_1.rows);
+
+        perspectiveTransform(corners, corners_trans, S*H_1);
+        Ap += contourArea(corners_trans);
+
+        float min_x_1, min_y_1;
+        min_x_1 = min_y_1 = +INF;
+        for (int j = 0; j < 4; j++) {
+            min_x_1 = min(corners_trans[j].x, min_x_1);
+            min_y_1 = min(corners_trans[j].y, min_y_1);
+        }
+
+        corners[0] = Point2f(0,0);
+        corners[1] = Point2f(img_2.cols,0);
+        corners[2] = Point2f(img_2.cols,img_2.rows);
+        corners[3] = Point2f(0,img_2.rows);
+
+        perspectiveTransform(corners, corners_trans, Sp*H_2);
+        Ap += contourArea(corners_trans);
+
+        float min_x_2, min_y_2;
+        min_x_2 = min_y_2 = +INF;
+        for (int j = 0; j < 4; j++) {
+            min_x_2 = min(corners_trans[j].x, min_x_2);
+            min_y_2 = min(corners_trans[j].y, min_y_2);
+        }
+
+        double scale = sqrt(A/Ap);
+        cout << "A = " << A << " \n/ Ap = " << Ap << endl;
+
+        double min_y = min_y_1 < min_y_2 ? min_y_1 : min_y_2;
+
+        // We define W2 as the scale transformation and W1 as the translation
+        // transformation. Then, W = W1*W2.
+
+        Mat W;
+        Mat Wp;
+
+        Mat W_1 = Mat::eye(3, 3, CV_64F);
+        Mat Wp_1 = Mat::eye(3, 3, CV_64F);
+
+        Mat W_2 = Mat::eye(3, 3, CV_64F);
+        Mat Wp_2 = Mat::eye(3, 3, CV_64F);
+
+        W_2.at<double>(0,0) = W_2.at<double>(1,1) = scale;
+        Wp_2.at<double>(0,0) = Wp_2.at<double>(1,1) = scale;
+
+        if(isImageInverted(img_1, W_2*H_1)){ (*@\label{invertida}@*)
+          W_2.at<double>(0,0) = W_2.at<double>(1,1) = -scale;
+          Wp_2.at<double>(0,0) = Wp_2.at<double>(1,1) = -scale;
+        }
+
+        corners[0] = Point2d(0,0);
+        corners[1] = Point2d(img_1.cols,0);
+        corners[2] = Point2d(img_1.cols,img_1.rows);
+        corners[3] = Point2d(0,img_1.rows);
+
+        perspectiveTransform(corners, corners_trans, W_2*S*H_1);
+
+        min_x_1 = min_y_1 = +INF;
+        for (int j = 0; j < 4; j++) {
+            min_x_1 = min(corners_trans[j].x, min_x_1);
+            min_y_1 = min(corners_trans[j].y, min_y_1);
+        }
+
+        corners[0] = Point2d(0,0);
+        corners[1] = Point2d(img_2.cols,0);
+        corners[2] = Point2d(img_2.cols,img_2.rows);
+        corners[3] = Point2d(0,img_2.rows);
+
+        perspectiveTransform(corners, corners_trans, Wp_2*Sp*H_2);
+
+        min_x_2 = min_y_2 = +INF;
+        for (int j = 0; j < 4; j++) {
+            min_x_2 = min(corners_trans[j].x, min_x_2);
+            min_y_2 = min(corners_trans[j].y, min_y_2);
+        }
+
+        min_y = min_y_1 < min_y_2 ? min_y_1 : min_y_2;
+
+        W_1.at<double>(0,2) = -min_x_1;
+        Wp_1.at<double>(0,2) = -min_x_2;
+
+        W_1.at<double>(1,2) = Wp_1.at<double>(1,2) = -min_y;
+
+        W = W_1*W_2;
+        Wp = Wp_1*Wp_2;
+
+        H_s = W*S;
+        Hp_s = Wp*Sp;
+
+        cout << "H_s = " << H_s << "\nHp_s = " << Hp_s << endl;
+    }
+    \end{lstlisting}
+
+    Todo este código simplemente implementa lo descrito anteriormente. Lo único que ha quedado sin explicar es la función \lstinline{isImageInverted}, que se usa en la línea \ref{invertida} para tomar $-s$ en caso de que la transformación invierta la imagen. El código de esta función comprueba que las esquinas no se den la vuelta, midiendo si la diferencia entre la coordenada vertical de la esquina inferior izquierda y la coordenada vertical de la esquina superior izquierda es negativa; en ese caso, es claro que la imagen se ha invertido:
+    \begin{lstlisting}
+    bool isImageInverted(const Mat &img, const Mat &homography){
+      vector<Point2d> corners(2), corners_trans(2);
+
+      corners[0] = Point2d(0,0);
+      corners[1] = Point2d(0,img.rows);
+
+      perspectiveTransform(corners, corners_trans, homography);
+
+      return corners_trans[1].y - corners_trans[0].y < 0.0;
+    }
+    \end{lstlisting}
+
+    \subsubsection{Homografía final}
+    Una vez se han calculado $H_p$, $H_r$ y $H_s$ ---y sus homólogas con las primas--- basta componerlas para obtener la homografía final que rectifica las imágenes con la menor distorsión posible:
+    \[
+    H = H_s H_r H_p\;\;\;\;\;\;
+    H' = H'_s H'_r H'_p
+    \]
+
+    Por último, se ha añadido código para mostrar las imágenes completas: tras calcular la posición de las esquinas de las imágenes proyectadas por $H$ y $H_p$, se toman sendos objetos \lstinline{Mat} donde se acomoden bien las nuevas imágenes y se proyectan allí las imágenes rectificadas. El extracto de código en \lstinline{main.cpp} que implementa este proceso es el siguiente:
+    \begin{lstlisting}
+        Mat H = H_s * H_r * H_p;
+        Mat Hp = Hp_s * Hp_r * Hp_p;
+
+        // Get homography image of the corner coordinates from all the images
+        vector<Point2d> corners_all(4), corners_all_t(4);
+        double min_x, min_y, max_x, max_y;
+        min_x = min_y = +INF;
+        max_x = max_y = -INF;
+
+        corners_all[0] = Point2d(0,0);
+        corners_all[1] = Point2d(img_1.cols,0);
+        corners_all[2] = Point2d(img_1.cols,img_1.rows);
+        corners_all[3] = Point2d(0,img_1.rows);
+
+        perspectiveTransform(corners_all, corners_all_t, H);
+
+        for (int j = 0; j < 4; j++) {
+            min_x = min(corners_all_t[j].x, min_x);
+            max_x = max(corners_all_t[j].x, max_x);
+
+            min_y = min(corners_all_t[j].y, min_y);
+            max_y = max(corners_all_t[j].y, max_y);
+        }
+
+        int img_1_cols = max_x - min_x;
+        int img_1_rows = max_y - min_y;
+
+        // Get homography image of the corner coordinates from all the images
+        min_x = min_y = +INF;
+        max_x = max_y = -INF;
+
+        corners_all[0] = Point2d(0,0);
+        corners_all[1] = Point2d(img_2.cols,0);
+        corners_all[2] = Point2d(img_2.cols,img_2.rows);
+        corners_all[3] = Point2d(0,img_2.rows);
+
+        perspectiveTransform(corners_all, corners_all_t, Hp);
+
+        for (int j = 0; j < 4; j++) {
+            min_x = min(corners_all_t[j].x, min_x);
+            max_x = max(corners_all_t[j].x, max_x);
+
+            min_y = min(corners_all_t[j].y, min_y);
+            max_y = max(corners_all_t[j].y, max_y);
+        }
+
+        int img_2_cols = max_x - min_x;
+        int img_2_rows = max_y - min_y;
+
+        // Apply homographies
+        Mat img_1_dst(img_1_rows, img_1_cols, CV_64F);
+        Mat img_2_dst(img_2_rows, img_2_cols, CV_64F);
+
+        warpPerspective( img_1, img_1_dst, H, img_1_dst.size() );
+        warpPerspective( img_2, img_2_dst, Hp, img_2_dst.size() );
+    \end{lstlisting}
 
     \section{Experimentos realizados}
 
-    Lola es muy guapa y adorable. V impone.
+
 
     \section{Valoración de resultados}
 
