@@ -4,6 +4,7 @@
 #include "util.hpp"
 
 #include <iostream>
+#include <cctype>
 
 using namespace cv;
 using namespace std;
@@ -19,30 +20,42 @@ int main(){
     // Mat img_1 = imread("Dropbox/Universidad/Vision por Computador/Foticos/img1.png");
     // Mat img_2 = imread("Dropbox/Universidad/Vision por Computador/Foticos/img2.png");
 
-    Mat img_1 = imread("Dropbox/Universidad/Vision por Computador/Foticos/perra_7.jpg");
-    Mat img_2 = imread("Dropbox/Universidad/Vision por Computador/Foticos/perra_8.jpg");
+    // Mat img_1 = imread("Dropbox/Universidad/Vision por Computador/Foticos/perra_7.jpg");
+    // Mat img_2 = imread("Dropbox/Universidad/Vision por Computador/Foticos/perra_8.jpg");
+
+    Mat img_1 = imread("Dropbox/Universidad/Vision por Computador/Foticos/madera_1.jpg");
+    Mat img_2 = imread("Dropbox/Universidad/Vision por Computador/Foticos/madera_2.jpg");
+
+    // Mat img_1 = imread("Dropbox/Universidad/Vision por Computador/Foticos/madera_1.jpg");
+    // Mat img_2 = imread("Dropbox/Universidad/Vision por Computador/Foticos/madera_2.jpg");
+
 
     // Buenas: madera{1-2}, perra{1-2,7-8,8-9}
     // Malas: cactus{1-2} madera{3-4,4-5,5-6}, perra{3-4,5-6}
     // Regulares: cactus{2-3}, nazaries{1-2}, cubo{1-2, 2-3}
 
-    Mat fund_mat;
+    Mat fund_mat = Mat::zeros(3,3,CV_64F);
 
     Vec3d epipole;
 
-    // Get epipolar geometry and draw epilines
-    computeAndDrawEpiLines(img_1, img_2, 150, epipole, fund_mat);
+    vector<Vec3d> lines_1, lines_2;
+    vector<Point2d> good_matches_1, good_matches_2;
+
+    // Get epipolar geometry
+    computeEpiLines(img_1, img_2,
+                    epipole, fund_mat,
+                    lines_1, lines_2,
+                    good_matches_1, good_matches_2);
 
     Mat A, B, Ap, Bp;
 
     Mat e_x = crossProductMatrix(epipole);
 
     cout << "Epipole: " <<  epipole << endl;
-    cout << "e_x = " << e_x << endl;
 
     /****************** PROJECTIVE **************************/
 
-    // Get A,B matrix for minimize z
+    // Get A,B matrix for minimizing z
     obtainAB(img_1, e_x, A, B);
     obtainAB(img_2, fund_mat, Ap, Bp);
 
@@ -180,6 +193,20 @@ int main(){
     warpPerspective( img_1, img_1_dst, H, img_1_dst.size() );
     warpPerspective( img_2, img_2_dst, Hp, img_2_dst.size() );
 
+    Vec3d epipole_dst;
+
+    vector<Vec3d> lines_1_dst, lines_2_dst;
+    vector<Point2d> good_matches_1_dst, good_matches_2_dst;
+
+    perspectiveTransform(good_matches_1, good_matches_1_dst, H);
+    perspectiveTransform(good_matches_2, good_matches_2_dst, Hp);
+
+    // Get epipolar geometry and draw epilines
+    computeEpiLines(img_1_dst, img_2_dst, epipole_dst, fund_mat, lines_1_dst, lines_2_dst, good_matches_1_dst, good_matches_2_dst);
+
+    drawEpilines(img_1, img_2, lines_1, lines_2, good_matches_1, good_matches_2, 150);
+    drawEpilines(img_1_dst, img_2_dst, lines_1_dst, lines_2_dst, good_matches_1_dst, good_matches_2_dst, 150);
+
     draw(img_1, "1");
     draw(img_1_dst, "1 proyectada");
 
@@ -195,10 +222,12 @@ int main(){
 
     c = 'a';
 
-    while (c != 'q')
+    while (tolower(c) != 'q')
       c = waitKey();
 
     destroyAllWindows();
 
     cout << ROJO << "H = " << H << "\nHp = " << Hp << RESET << endl;
+
+    cout << AZUL << "Epipolo antes: " << epipole << "\nEpipolo después: " << epipole_dst << RESET << endl;
 }
