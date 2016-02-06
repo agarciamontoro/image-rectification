@@ -20,8 +20,6 @@
 
 \newcommand{\includecode}[2][c]{\lstinputlisting[caption=#2, escapechar=, style=custom#1]{#2}<!---->}
 
-\newcommand{\sectionbreak}{\clearpage}
-
 %Paquetes matemáticos
 \usepackage{amsmath,amsfonts,amsthm}
 \usepackage[all]{xy} %Para diagramas
@@ -150,8 +148,8 @@
 
     Es de hecho este último criterio el que hace del algoritmo una de las mejores soluciones actuales, ya que se consigue una rectificación que mantiene casi todas las propiedades de las imágenes originales.
 
-
-    \section{Descripción de la solución implementada}
+    \clearpage
+    \section{Descripción de la solución implementada}\footnote{Se ha reutilizado código de prácticas anteriores de los autores.}
 
     La implementación del algoritmo se basa en la descomposición de la homografía $H$ que se quiere obtener en las siguientes transformaciones:
     \begin{itemize}
@@ -846,18 +844,86 @@
         warpPerspective( img_2, img_2_dst, Hp, img_2_dst.size() );
     \end{lstlisting}
 
+    \clearpage
     \section{Experimentos realizados}
+    La implementación del algoritmo se ha ido comprobando paso por paso con pruebas unitarias y de forma conjunta con varios pares de imágenes propias.
 
+    Se ha comprobado la solución matemática de cada paso, como la comprobación de la raíz del polinomio o el cálculo final del epipolo, y la solución visual del conjunto, comprobando que efectivamente las líneas epipolares recalculadas eran horizontales, paralelas y tenían la misma coordenada vertical.
 
+    Así, hemos imprimido las imágenes originales con las líneas epipolares calculadas y, con las correspondencias guardadas, se ha recalculado la geometría epipolar tras aplicar las homografías resultantes, comprobando que efectivamente el epipolo se alineaba con la dirección $[1, 0, 0]$ y que las líneas epipolares estaban rectificadas.
 
+    En esta última comprobación ha sido muy importante usar las mismas correspondencias ---evidentemente reproyectadas por las homografías--- que se tomaron como buenas en el cálculo original de la matriz fundamental  para recalcularla tras rectificar las imágenes. Para eso, hemos prescindido de usar \lstinline{RANSAC} en este segundo cálculo, asegurándonos así que se tomaba la matriz fundamental que mejor se ajustaba a las correspondencias originales reproyectadas.
+
+    Este proceso se ha implementado dentro de la función \lstinline{fundamentalMat}:
+    \begin{lstlisting}
+    if (good_matches_1.empty() && good_matches_2.empty()){
+      matches = match(one, other, descriptor_id::BRUTE_FORCE, detector_id::BRISK);
+      first = matches.first;
+      second = matches.second;
+      flag |= CV_FM_RANSAC;
+    }
+    else{
+      first = good_matches_1;
+      second = good_matches_2;
+    }
+    \end{lstlisting}
+
+    Los valores obtenidos son los esperados y la rectificación de las imágenes es tan buena como se puede esperar del algoritmo.
+
+    A continuación mostramos tres pares de imágenes a las que se les ha aplicado el algoritmo.
+
+    \begin{figure}[ht!]
+    	\centering
+    	\includegraphics[width=160mm]{Lola-Normal.png}
+    	\caption{Par original de fotografías de Lola, mascota de uno de los autores.}
+    \end{figure}
+
+    \begin{figure}[ht!]
+        \centering
+        \includegraphics[width=160mm]{Lola-Proyectado.png}
+        \caption{Par rectificado de fotografías de Lola, mascota de uno de los autores.}
+    \end{figure}
+
+    \begin{figure}[ht!]
+        \centering
+        \includegraphics[width=160mm]{Monigote-Normal.png}
+        \caption{Par original de fotografías de un muñeco de madera.}
+    \end{figure}
+
+    \begin{figure}[ht!]
+        \centering
+        \includegraphics[width=160mm]{Monigote-Proyectado.png}
+        \caption{Par rectificado de fotografías de un muñeco de madera.}
+    \end{figure}
+
+    \begin{figure}[ht!]
+        \centering
+        \includegraphics[width=160mm]{V-Normal.png}
+        \caption{Par original de fotografías de una figura de cine.}
+    \end{figure}
+
+    \begin{figure}[ht!]
+        \centering
+        \includegraphics[width=160mm]{V-Proyectado.png}
+        \caption{Par rectificado de fotografías de una figura de cine.}
+    \end{figure}
+
+    \clearpage
     \section{Valoración de resultados}
 
-    Todo se ve de lujo
+    Los resultado son, tanto visual como matemáticamente, tal y como se esperaban. Los epipolos, como se ve en las siguiente salidas, son tan cercanos al $[1, 0, 0]$ como la precisión de la máquina puede conseguir.
 
-    \section{Conclusiones}
+    En la ejecución se muestra el epipolo original normalizado por la tercera coordenada.
 
-    Este algoritmo es pro. Mejor que el de OpenCV.
+    En el par de imágenes de la perra, el epipolo original es $[5868.93, -278.987, 1]$ y el rectificado, $[0.999998, -0.002162, -1.76364e-05]$.
 
+    En el par de imágenes del muñeco de madera, el epipolo original es $[-9167.01, -551.777, 1]$ y el rectificado, $[0.999999, -0.00146798, -2.12774e-06]$.
+
+    En el par de imágenes del muñeco de cine, el epipolo original es $[2214.98, 523.468, 1]$ y el rectificado, $[0.999999, 0.00120902, 7.31557e-06]$.
+
+    Visualmente, es claro que todas las líneas son horizontales, paralelas entre sí y están a la misma altura.
+
+    En la ejecución del código se pueden ver los resultados de las comprobaciones matemáticas y de las homografías finales.
 
 
     % -------------------------- Bibliografía ------------------------
