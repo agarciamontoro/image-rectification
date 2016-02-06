@@ -30,8 +30,13 @@ int main(){
 
     Vec3d epipole;
 
+    vector<Vec3d> lines_1, lines_2;
+    vector<Point2d> good_matches_1, good_matches_2;
+
     // Get epipolar geometry and draw epilines
-    computeAndDrawEpiLines(img_1, img_2, 150, epipole, fund_mat);
+    computeEpiLines(img_1, img_2, epipole, fund_mat, lines_1, lines_2, good_matches_1, good_matches_2);
+
+    //drawEpilines(img_1, img_2, lines_1, lines_2, good_matches_1, good_matches_2, 150);
 
     Mat A, B, Ap, Bp;
 

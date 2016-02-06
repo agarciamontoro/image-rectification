@@ -24,22 +24,15 @@ string type2str(int type) {
 }
 
 
-double computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole, Mat &fund_mat){
-    vector<Point2d> good_matches_1;
-    vector<Point2d> good_matches_2;
+double computeEpiLines(Mat &one, Mat &other, Vec3d &epipole, Mat &fund_mat, vector<Vec3d> &lines_1, vector<Vec3d> &lines_2, vector<Point2d> &good_matches_1,vector<Point2d> &good_matches_2){
 
     fund_mat = fundamentalMat(one, other, good_matches_1, good_matches_2);
     // fund_mat = manualFundMat(good_matches_1, good_matches_2);
 
-    vector<Vec3d> lines_1, lines_2;
-
     computeCorrespondEpilines(good_matches_1, 1, fund_mat, lines_2);
     computeCorrespondEpilines(good_matches_2, 2, fund_mat, lines_1);
 
-    RNG rng;
-    theRNG().state = clock();
-
-    // Draws both sets of epipolar lines and computes the distances between
+    // Computes the distances between
     // the lines and their corresponding points.
     double distance_1 = 0.0, distance_2 = 0.0;
     for (size_t i = 0; i < lines_1.size(); i++) {
@@ -48,38 +41,6 @@ double computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipol
 
         Vec3d line_1 = lines_1[i];
         Vec3d line_2 = lines_2[i];
-
-        // Draws only num_lines lines
-        if(i % (lines_1.size()/num_lines) == 0 ){
-            Scalar color(rng.uniform(0, 255),
-                         rng.uniform(0, 255),
-                         rng.uniform(0, 255));
-
-            line(one,
-                 Point(0, -line_1[2]/line_1[1]),
-                 Point(one.cols, -(line_1[2] + line_1[0]*one.cols)/line_1[1]),
-                 color
-                 );
-            circle(one,
-                    Point2d(point_1[0], point_1[1]),
-                    4,
-                    color,
-                    CV_FILLED);
-
-            line(other,
-                 Point(0,
-                       -line_2[2]/line_2[1]),
-                 Point(other.cols,
-                       -(line_2[2] + line_2[0]*other.cols)/line_2[1]),
-                 color
-                 );
-            circle(other,
-                    Point2d(point_2[0], point_2[1]),
-                    4,
-                    color,
-                    CV_FILLED);
-
-        }
 
         // Error computation with distance point-to-line
         distance_1 += abs(line_1[0]*point_2[0] +
@@ -106,6 +67,50 @@ double computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipol
      return (distance_1+distance_2)/(2*lines_1.size());
 }
 
+
+void drawEpilines(Mat &one, Mat &other, vector<Vec3d> &lines_1, vector<Vec3d> &lines_2, vector<Point2d> &good_matches_1, vector<Point2d> &good_matches_2, int num_lines){
+  RNG rng;
+  theRNG().state = clock();
+
+  for (size_t i = 0; i < lines_1.size(); i++) {
+      Vec2d point_1 = good_matches_1[i];
+      Vec2d point_2 = good_matches_2[i];
+
+      Vec3d line_1 = lines_1[i];
+      Vec3d line_2 = lines_2[i];
+    // Draws only num_lines lines
+    if(i % (lines_1.size()/num_lines) == 0 ){
+        Scalar color(rng.uniform(0, 255),
+                     rng.uniform(0, 255),
+                     rng.uniform(0, 255));
+
+        line(one,
+             Point(0, -line_1[2]/line_1[1]),
+             Point(one.cols, -(line_1[2] + line_1[0]*one.cols)/line_1[1]),
+             color
+             );
+        circle(one,
+                Point2d(point_1[0], point_1[1]),
+                4,
+                color,
+                CV_FILLED);
+
+        line(other,
+             Point(0,
+                   -line_2[2]/line_2[1]),
+             Point(other.cols,
+                   -(line_2[2] + line_2[0]*other.cols)/line_2[1]),
+             color
+             );
+        circle(other,
+                Point2d(point_2[0], point_2[1]),
+                4,
+                color,
+                CV_FILLED);
+
+    }
+  }
+}
 
 Mat fundamentalMat(Mat &one, Mat &other,
                           vector<Point2d> &good_matches_1,
