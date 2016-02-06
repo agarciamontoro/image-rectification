@@ -727,7 +727,10 @@ double NewtonRaphson(const Mat &A, const Mat &B,
     double fx = function(A,B,Ap,Bp, current);
     double dfx = derivative(A,B,Ap,Bp, current);
 
+    int i = 0;
+
     do {
+      i++;
         previous = current;
         current = current - fx / dfx;
 
@@ -735,7 +738,7 @@ double NewtonRaphson(const Mat &A, const Mat &B,
         dfx = derivative(A,B,Ap,Bp, current);
 
         cout << ROJO << fx << RESET << endl;
-    } while (abs(fx) > 1e-15);
+    } while (abs(fx) > 1e-15 && i < 150);
     // Double-precision values have 15 stable decimal positions
 
     return current;

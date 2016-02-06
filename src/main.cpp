@@ -19,8 +19,11 @@ int main(){
     // Mat img_1 = imread("Dropbox/Universidad/Vision por Computador/Foticos/img1.png");
     // Mat img_2 = imread("Dropbox/Universidad/Vision por Computador/Foticos/img2.png");
 
-    Mat img_1 = imread("Dropbox/Universidad/Vision por Computador/Foticos/perra_7.jpg");
-    Mat img_2 = imread("Dropbox/Universidad/Vision por Computador/Foticos/perra_8.jpg");
+    // Mat img_1 = imread("Dropbox/Universidad/Vision por Computador/Foticos/perra_7.jpg");
+    // Mat img_2 = imread("Dropbox/Universidad/Vision por Computador/Foticos/perra_8.jpg");
+
+    Mat img_1 = imread("Dropbox/Universidad/Vision por Computador/Foticos/madera_1.jpg");
+    Mat img_2 = imread("Dropbox/Universidad/Vision por Computador/Foticos/madera_2.jpg");
 
     // Buenas: madera{1-2}, perra{1-2,7-8,8-9}
     // Malas: cactus{1-2} madera{3-4,4-5,5-6}, perra{3-4,5-6}
