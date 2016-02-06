@@ -33,21 +33,21 @@ int main(){
     vector<Vec3d> lines_1, lines_2;
     vector<Point2d> good_matches_1, good_matches_2;
 
-    // Get epipolar geometry and draw epilines
-    computeEpiLines(img_1, img_2, epipole, fund_mat, lines_1, lines_2, good_matches_1, good_matches_2);
-
-    //drawEpilines(img_1, img_2, lines_1, lines_2, good_matches_1, good_matches_2, 150);
+    // Get epipolar geometry
+    computeEpiLines(img_1, img_2,
+                    epipole, fund_mat,
+                    lines_1, lines_2,
+                    good_matches_1, good_matches_2);
 
     Mat A, B, Ap, Bp;
 
     Mat e_x = crossProductMatrix(epipole);
 
     cout << "Epipole: " <<  epipole << endl;
-    cout << "e_x = " << e_x << endl;
 
     /****************** PROJECTIVE **************************/
 
-    // Get A,B matrix for minimize z
+    // Get A,B matrix for minimizing z
     obtainAB(img_1, e_x, A, B);
     obtainAB(img_2, fund_mat, Ap, Bp);
 
@@ -181,7 +181,6 @@ int main(){
     // Apply homographies
     Mat img_1_dst(img_1_rows, img_1_cols, CV_64F);
     Mat img_2_dst(img_2_rows, img_2_cols, CV_64F);
-    // drawEpilines(img_1, img_2, lines_1, lines_2, good_matches_1, good_matches_2, 150);
 
     warpPerspective( img_1, img_1_dst, H, img_1_dst.size() );
     warpPerspective( img_2, img_2_dst, Hp, img_2_dst.size() );
@@ -221,4 +220,6 @@ int main(){
     destroyAllWindows();
 
     cout << ROJO << "H = " << H << "\nHp = " << Hp << RESET << endl;
+
+    cout << AZUL << "Epipolo antes: " << epipole << "\nEpipolo después: " << epipole_dst << RESET << endl;
 }

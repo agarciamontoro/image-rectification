@@ -36,7 +36,24 @@ double computeEpiLines(Mat &one, Mat &other, Vec3d &epipole, Mat &fund_mat, vect
       cout << "NOT INITIALIZED!" << endl;
       fund_mat = fundamentalMat(one, other, good_matches_1, good_matches_2);
       // fund_mat = manualFundMat(good_matches_1, good_matches_2);
-      //
+    }
+    else{
+        vector<unsigned char> mask;
+        fund_mat = findFundamentalMat(good_matches_1, good_matches_2,
+                                      CV_FM_8POINT | CV_FM_RANSAC,
+                                      1., 0.99, mask );
+
+        vector<Point2d> final_1, final_2;
+
+        for (size_t i = 0; i < mask.size(); i++) {
+            if(mask[i] == 1){
+                final_1.push_back(good_matches_1[i]);
+                final_2.push_back(good_matches_2[i]);
+            }
+        }
+
+        good_matches_1 = vector<Point2d>(final_1);
+        good_matches_2 = vector<Point2d>(final_2);
     }
 
     computeCorrespondEpilines(good_matches_1, 1, fund_mat, lines_2);
@@ -742,6 +759,8 @@ double NewtonRaphson(const Mat &A, const Mat &B,
     double fx = function(A,B,Ap,Bp, current);
     double dfx = derivative(A,B,Ap,Bp, current);
 
+    int iterations = 0;
+
     do {
         previous = current;
         current = current - fx / dfx;
@@ -750,7 +769,8 @@ double NewtonRaphson(const Mat &A, const Mat &B,
         dfx = derivative(A,B,Ap,Bp, current);
 
         cout << ROJO << fx << RESET << endl;
-    } while (abs(fx) > 1e-15);
+        iterations++;
+    } while (abs(fx) > 1e-15 && iterations < 150);
     // Double-precision values have 15 stable decimal positions
 
     return current;
