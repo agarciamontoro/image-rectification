@@ -252,7 +252,7 @@
 
     Desarrollando la expresión descrita en \ref{eq_minz} obtenemos un polinomio en $\lambda$ cuyo mínimo es el valor que buscamos. Este mínimo se alcanza cuando su derivada con respecto a $\lambda$ es cero, así que todo nuestro problema se reduce a encontrar esta raíz.
 
-    \subsection{Primera aproximación a la raíz}
+    \subsubsection{Primera aproximación a la raíz}
 
     En \cite{LoopZhang} se da una primera aproximación a esta raíz, cuyo cálculo consiste en minimizar por separado ambos sumandos y tomar la media normalizada de las dos soluciones.
 
@@ -357,15 +357,93 @@
 
     En este punto del proceso tenemos una primera aproximación a la raíz que necesitamos, muy cercana a la real según \cite{LoopZhang} pero que puede ser optimizada.
 
-    \subsection{Optimización de la raíz}
+    \subsubsection{Optimización de la raíz}
     El problema de encontrar una raíz de un polinomio está intensamente documentado en la literatura, y uno de los mejores algoritmos para abordar este problema es el de Newton-Raphson.
 
     Para implementarlo, hace falta simplemente la función cuya raíz queremos encontrar, su derivada y una primera aproximación.
 
     La función cuya raíz queremos encontrar es la derivada con respecto a $\lambda$ de la expresión \ref{eq_minz}. Esta función, tomando como parámetros $A$, $B$, $A'$ y $B'$ es la siguiente:
-    \[
-    (2*a'_{0,0}*x+a'_{1,0}+a'_{0,1})/(x*(b'_{0,0}*x+b'_{0,1})+b'_{1,0}*x+b'_{1,1})-((2*b'_{0,0}*x+b'_{1,0}+b'_{0,1})*(x*(a'_{0,0}*x+a'_{0,1})+a'_{1,0}*x+a'_{1,1}))/(x*(b'_{0,0}*x+b'_{0,1})+b'_{1,0}*x+b'_{1,1})^2+(2*a_{0,0}*x+a_{1,0}+a_{0,1})/(x*(b_{0,0}*x+b_{0,1})+b_{1,0}*x+b_{1,1})-((2*b_{0,0}*x+b_{1,0}+b_{0,1})*(x*(a_{0,0}*x+a_{0,1})+a_{1,0}*x+a_{1,1}))/(x*(b_{0,0}*x+b_{0,1})+b_{1,0}*x+b_{1,1})^2
-    \]
+    \begin{align*}
+    f(\lambda) &= \frac{2A'_{0,0}\lambda+A'_{1,0}+A'_{0,1}}{\lambda(B'_{0,0}\lambda+B'_{0,1})+B'_{1,0}\lambda+B'_{1,1}} \\
+    &- \frac{(2B'_{0,0}\lambda+B'_{1,0}+B'_{0,1})(\lambda(A'_{0,0}\lambda+A'_{0,1})+A'_{1,0}\lambda+A'_{1,1})}{(\lambda(B'_{0,0}\lambda+B'_{0,1})+B'_{1,0}\lambda+B'_{1,1})^2} \\
+    &+ \frac{2A_{0,0}\lambda+A_{1,0}+A_{0,1}}{\lambda(B_{0,0}\lambda+B_{0,1})+B_{1,0}\lambda+B_{1,1}} \\
+    & - \frac{(2B_{0,0}\lambda+B_{1,0}+B_{0,1})(\lambda(A_{0,0}\lambda+A_{0,1})+A_{1,0}\lambda+A_{1,1})}{(\lambda(B_{0,0}\lambda+B_{0,1})+B_{1,0}\lambda+B_{1,1})^2}
+    \end{align*}
+
+    Basta entonces implementar esta función, su derivada ---cuya expresión no representamos aquí por ser demasiado larga--- y el método de Newton-Raphson para optimizar la primera aproximación de la raíz que obtuvimos en el paso anterior. Todo este cálculo numérico de notación obtusa pero razonamiento evidente, se encuentra encapsulado en la siguiente función:
+    \begin{lstlisting}
+    void optimizeRoot(const Mat &A, const Mat &B,
+                       const Mat &Ap, const Mat &Bp,
+                       Vec3d &z){
+
+        double lambda = z[0];
+
+        z[0] = NewtonRaphson(A,B,Ap,Bp, lambda);
+        z[1] = 1.0;
+        z[2] = 0.0;
+    }
+    \end{lstlisting}
+
+    La función interesante es \lstinline{NewtonRaphson}, cuyo código es el siguiente:
+    \begin{lstlisting}
+    double NewtonRaphson(const Mat &A, const Mat &B,
+                         const Mat &Ap, const Mat &Bp,
+                         double init_guess){
+        double current = init_guess;
+        double previous;
+
+        double fx = function(A,B,Ap,Bp, current);
+        double dfx = derivative(A,B,Ap,Bp, current);
+
+        int iterations = 0;
+
+        do {
+            previous = current;
+            current = current - fx / dfx;
+
+            fx = function(A,B,Ap,Bp, current);
+            dfx = derivative(A,B,Ap,Bp, current);
+
+            iterations++;
+        } while (abs(fx) > 1e-15 && iterations < 150);
+        // Double-precision values have 15 stable decimal positions
+
+        return current;
+    }
+    \end{lstlisting}
+    donde \lstinline{function} y \lstinline{derivative} son las funciones $f(\lambda)$ y $\frac{d}{d\lambda}f(\lambda)$, cuyo código se puede encontrar en el fichero \lstinline{utils.cpp}.
+
+    Del algoritmo de Newton-Raphson cabe mencionar su criterio de parada: se busca un elemento $\alpha$ tal que $f(\alpha) \in ]-\varepsilon, \varepsilon[$, donde $\varepsilon = 10^{-15}$. La elección de $\varepsilon$ se debe a la precisión de los \lstinline{double}: son 15 las posiciones decimales que el estándar considera estables ---de hecho, la precisión es de 15.95 posiciones decimales, así que hay casi un decimal más de precisión---; como esto es lo mínimo que podemos medir con rigor, es un buen valor como criterio de parada. En todo caso, si este valor no se alcanzara ---en ocasiones la raíz no cambia de una iteración a otra y aún no se ha entrado en el intervalo $]-\varepsilon, \varepsilon[$---, el algoritmo se detiene tras 150 iteraciones.
+
+    \subsubsection{Construcción de la homografía}
+    Una vez se ha optimizado la raíz con el método de Newton-Raphson, basta tomar las siguientes líneas:
+    \begin{align*}
+        w &= [e]_\times z \\
+        w' &= F z
+    \end{align*}
+    y usar la primera y segunda coordenadas de las mismas para construir la matriz, como se hace en el siguiente extracto del código de \lstinline{main.cpp}:
+    \begin{lstlisting}
+    // Get w
+    Mat w = e_x * Mat(z);
+    Mat wp = fund_mat * Mat(z);
+
+    w /= w.at<double>(2,0);
+    wp /= wp.at<double>(2,0);
+
+    cout << "w = " << w << endl;
+    cout << "wp = " << wp << endl;
+
+    // Get final H_p and Hp_p matrix for projection
+    Mat H_p = Mat::eye(3, 3, CV_64F);
+    H_p.at<double>(2,0) = w.at<double>(0,0);
+    H_p.at<double>(2,1) = w.at<double>(1,0);
+
+    Mat Hp_p = Mat::eye(3, 3, CV_64F);
+    Hp_p.at<double>(2,0) = wp.at<double>(0,0);
+    Hp_p.at<double>(2,1) = wp.at<double>(1,0);
+    \end{lstlisting}
+
+    En este momento tenemos sendas homorgafías $H_p$ y $H'_p$, tan cercanas a una homorgafía afín como es posible, que transforman los epipolos $e$ y $e'$ a puntos del infinito.
 
     \subsection{Transformación de semejanza}
     Euclídea
