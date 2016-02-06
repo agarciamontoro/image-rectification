@@ -130,31 +130,43 @@ rulecolor=,
 
   \section{Descripción del problema}
 
-    La rectificación de imágenes es el proceso de aplicar dos homografías a un par
-    de imágenes cuya geometría epipolar conocemos, para que las líneas epipolares
-    queden horizontales y paralelas entre sí. El método que proponen \emph{Loop \& Zhang}
-    es totalmente geométrico, no precisa de conocimiento de las cámaras.
-    Se consigue descomponiendo la homografía en una proyección, una transformación
-    euclídea y una cizalla, con especial cuidado en minimizar la distorsión.
+    La rectificación de imágenes es el proceso de aplicar sendas homografías a un par de imágenes cuya geometría epipolar conocemos, de modo que las líneas epipolares queden horizontales, paralelas entre sí y con la misma coordenada vertical.
 
-    La motivación de la rectificación es simple: es más fácil buscar correspondencias
-    cuando las imágenes están rectificadas, ya que sólo hay que buscar en la línea
-    epipolar, siendo la distancia que separa ambas correspondencias la \emph{disparidad}.
-    Esta distancia está relacionada con la profundidad, por lo que se puede reconstruir
-    la profundidad sin noción alguna de cámaras.
+    La motivación de la rectificación es simple: al tener las líneas epipolares horizontales y con la misma coordenada vertical, buscar correspondencias entre las dos imágenes es mucho más fácil y eficiente; como sabemos que las correspondencias se encuentran en las mismas líneas epipolares, si suponemos que las imágenes están rectificadas basta buscar en la correspondiente fila de píxeles de la otra imagen, donde se encuentra la línea epipolar del punto que estemos considerando. Si las imágenes no estuvieran rectificadas, el tiempo de ejecución aumentaría considerablemente; la búsqueda en líneas inclinadas ---no paralelas con ninguno de los dos ejes--- es más compleja computacionalmente.
+
+    Así, es claro que tener un par de imágenes rectificadas mejora la eficiencia de muchos de los algoritmos que precisan conocer la geometría epipolar y tienen que buscar correspondencias entre ambas imágenes. Por ejemplo, de esta situación se consigue la mejora computacional de los algoritmos que calculan mapas de disparidad, donde hay que medir el desplazamiento relativo entre los píxeles de una y otra imagen. Esta distancia relativa es lo que conocemos por \emph{disparidad}, y con esta información se puede reconstruir la profundidad incluso sin noción alguna de cámaras; basta un par de imágenes de una misma escena estática.
+
+    \subsection{Solución implementada}
+
+    Este proyecto implementa el método propuesto por \emph{Charles Loop} y \emph{Zhengyou Zhang} en \cite{LoopZhang}.
+
+    Su algoritmo es totalmente geométrico y no precisa conocimiento de las cámaras.
+    Se consigue descomponiendo la homografía que se desea calcular para cada imagen en una proyección, una transformación euclídea y una cizalla, con especial cuidado en minimizar la distorsión del resultado con respecto a las imágenes originales.
+
+    Es de hecho este último criterio el que hace del algoritmo una de las mejores soluciones actuales, ya que se consigue una rectificación que mantiene casi todas las propiedades de las imágenes originales.
+
 
     \section{Enfoque de la implementación y detalles de eficiencia}
 
-      La implementación ha tenido un enfoque totalmente funcional, nada de orientación
+    La implementación del algoritmo se basa en la descomposición de la homografía $H$ que se quiere obtener en las siguientes transformaciones:
+    \begin{itemize}
+        \item $H_p$: transformación proyectiva.
+        \item $H_r$: transformación de semejanza.
+        \item $H_s$: composición de una transformación de cizalla con un escalado y una traslación.
+    \end{itemize}
+
+
+
+     nada de orientación
       a objetos. Se han calculado las transformaciones por separado.
 
       \subsection{Transformación proyectiva}
       Proyectiva
 
-      \subsection{Euclídea}
+      \subsection{Transformación de semejanza}
       Euclídea
 
-      \subsection{Cizalla}
+      \subsection{Transformación de cizalla}
 
     \section{Experimentos realizados}
 
