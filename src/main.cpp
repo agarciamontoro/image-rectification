@@ -11,28 +11,15 @@ using namespace std;
 
 int main(){
     /****************** EPIPOLAR GEOMETRY **************************/
-    // Mat img_1 = imread("img/Vmort1.pgm");
-    // Mat img_2 = imread("img/Vmort2.pgm");
 
-    // Mat img_1 = imread("img/monitogo.png");
-    // Mat img_2 = imread("img/monitogo2.png");
+    // Mat img_1 = imread("img/img1.png");
+    // Mat img_2 = imread("img/img2.png");
 
-    // Mat img_1 = imread("Dropbox/Universidad/Vision por Computador/Foticos/img1.png");
-    // Mat img_2 = imread("Dropbox/Universidad/Vision por Computador/Foticos/img2.png");
+    // Mat img_1 = imread("img/perra_7.jpg");
+    // Mat img_2 = imread("img/perra_8.jpg");
 
-    // Mat img_1 = imread("Dropbox/Universidad/Vision por Computador/Foticos/perra_7.jpg");
-    // Mat img_2 = imread("Dropbox/Universidad/Vision por Computador/Foticos/perra_8.jpg");
-
-    Mat img_1 = imread("Dropbox/Universidad/Vision por Computador/Foticos/madera_1.jpg");
-    Mat img_2 = imread("Dropbox/Universidad/Vision por Computador/Foticos/madera_2.jpg");
-
-    // Mat img_1 = imread("Dropbox/Universidad/Vision por Computador/Foticos/madera_1.jpg");
-    // Mat img_2 = imread("Dropbox/Universidad/Vision por Computador/Foticos/madera_2.jpg");
-
-
-    // Buenas: madera{1-2}, perra{1-2,7-8,8-9}
-    // Malas: cactus{1-2} madera{3-4,4-5,5-6}, perra{3-4,5-6}
-    // Regulares: cactus{2-3}, nazaries{1-2}, cubo{1-2, 2-3}
+    Mat img_1 = imread("img/madera_1.jpg");
+    Mat img_2 = imread("img/madera_2.jpg");
 
     Mat fund_mat = Mat::zeros(3,3,CV_64F);
 
@@ -51,18 +38,11 @@ int main(){
 
     Mat e_x = crossProductMatrix(epipole);
 
-    cout << "Epipole: " <<  epipole << endl;
-
     /****************** PROJECTIVE **************************/
 
     // Get A,B matrix for minimizing z
     obtainAB(img_1, e_x, A, B);
     obtainAB(img_2, fund_mat, Ap, Bp);
-
-    cout << "A = " << A << endl;
-    cout << "B = " << B << endl;
-    cout << "Ap = " << Ap << endl;
-    cout << "Bp = " << Bp << endl << endl;
 
     // Get initial guess for z
     Vec3d z = getInitialGuess(A, B, Ap, Bp);
@@ -70,17 +50,12 @@ int main(){
     // Optimizes the z solution
     optimizeRoot(A, B, Ap, Bp, z);
 
-    cout << "z = " << z << endl;
-
     // Get w
     Mat w = e_x * Mat(z);
     Mat wp = fund_mat * Mat(z);
 
     w /= w.at<double>(2,0);
     wp /= wp.at<double>(2,0);
-
-    cout << "w = " << w << endl;
-    cout << "wp = " << wp << endl;
 
     // Get final H_p and Hp_p matrix for projection
     Mat H_p = Mat::eye(3, 3, CV_64F);
@@ -95,8 +70,6 @@ int main(){
 
     // Get the translation term
     double vp_c = getTranslationTerm(img_1, img_2, H_p, Hp_p);
-
-    cout << "vp_c = " << vp_c << endl;
 
     // Get the H_r and Hp_r matrix directly
     Mat H_r = Mat::zeros(3, 3, CV_64F);
@@ -132,9 +105,6 @@ int main(){
     getShearingTransforms(img_1, img_2, H_1, H_2, H_s, Hp_s);
 
     /****************** RECTIFY IMAGES **********************/
-
-    cout << "H_p = " << H_p << endl;
-    cout << "Hp_p = " << Hp_p << endl;
 
     Mat H = H_s * H_r * H_p;
     Mat Hp = Hp_s * Hp_r * Hp_p;
@@ -207,18 +177,17 @@ int main(){
     drawEpilines(img_1, img_2, lines_1, lines_2, good_matches_1, good_matches_2, 150);
     drawEpilines(img_1_dst, img_2_dst, lines_1_dst, lines_2_dst, good_matches_1_dst, good_matches_2_dst, 150);
 
+    cout << "\nH = " << H << "\nHp = " << Hp << endl;
+
+    cout << "\nEpipolo antes: " << epipole/epipole[2] << "\nEpipolo después: " << epipole_dst << endl;
+
     draw(img_1, "1");
-    draw(img_1_dst, "1 proyectada");
+    draw(img_1_dst, "1 rectificada");
 
     char c = 'a';
 
-    // while (c != 'q')
-    //   c = waitKey();
-    //
-    // destroyAllWindows();
-
     draw(img_2, "2");
-    draw(img_2_dst, "2 proyectada");
+    draw(img_2_dst, "2 rectificada");
 
     c = 'a';
 
@@ -227,7 +196,4 @@ int main(){
 
     destroyAllWindows();
 
-    cout << ROJO << "H = " << H << "\nHp = " << Hp << RESET << endl;
-
-    cout << AZUL << "Epipolo antes: " << epipole << "\nEpipolo después: " << epipole_dst << RESET << endl;
 }

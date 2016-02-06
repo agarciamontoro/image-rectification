@@ -61,8 +61,6 @@ double computeEpiLines(Mat &one, Mat &other, Vec3d &epipole, Mat &fund_mat, vect
      epipole[1] = epi_mat.at<double>(0,1);
      epipole[2] = epi_mat.at<double>(0,2);
 
-    //  epipole /= epipole[2];
-
      return (distance_1+distance_2)/(2*lines_1.size());
 }
 
@@ -322,7 +320,7 @@ Vec3d maximize(Mat &A, Mat &B){
     Mat eigenvalues;
     eigen(A, eigenvalues);
 
-    cout << "\n\n\n----------------------------- WARNING -----------------------" << endl;
+    cout << "\n\n\n----------------------------- ERROR -----------------------" << endl;
     cout << "A = " << A << endl;
     cout << "A eigenvalues: " << eigenvalues << endl << endl;
 
@@ -334,9 +332,6 @@ Vec3d getInitialGuess(Mat &A, Mat &B, Mat &Ap, Mat &Bp){
 
     Vec3d z_1 = maximize(A, B);
     Vec3d z_2 = maximize(Ap, Bp);
-
-    cout << "Z_1: " << z_1 << endl <<"Normalizado: " << normalize(z_1) << endl;
-    cout << "Z_2: " << z_2 << endl <<"Normalizado: " << normalize(z_2) << endl;
 
     return (normalize(z_1) + normalize(z_2))/2;
 }
@@ -464,12 +459,10 @@ Mat getS(const Mat &img, const Mat &homography){
 
 
     Mat EQ18 = (S * Mat(x_hom)).t() * (S * Mat(y_hom));
-    cout << ROJO << "EQ18 " << EQ18 << RESET << endl;
+    cout  << "EQ18 " << EQ18 << endl;
 
     Mat EQ19 = ((S * Mat(x_hom)).t() * (S * Mat(x_hom))) / ((S * Mat(y_hom)).t() * (S * Mat(y_hom))) - (1.*w*w)/(1.*h*h);
-    cout << ROJO << "EQ19 " << EQ19 << RESET << endl;
-
-    cout << "S = " << S << endl;
+    cout  << "EQ19 " << EQ19 << endl;
 
     return S;
 }
@@ -518,7 +511,6 @@ void getShearingTransforms(const Mat &img_1, const Mat &img_2,
     }
 
     double scale = sqrt(A/Ap);
-    cout << "A = " << A << " \n/ Ap = " << Ap << endl;
 
     double min_y = min_y_1 < min_y_2 ? min_y_1 : min_y_2;
 
@@ -580,8 +572,6 @@ void getShearingTransforms(const Mat &img_1, const Mat &img_2,
 
     H_s = W*S;
     Hp_s = Wp*Sp;
-
-    cout << "H_s = " << H_s << "\nHp_s = " << Hp_s << endl;
 }
 
 
@@ -603,7 +593,7 @@ bool choleskyCustomDecomp(const Mat &A, Mat &L){
             L.at<double>(i,j) *= -1;
           }
           else{
-            cout << "ERROR HERE HERE HERE: " << L.at<double>(i,j) << endl;
+            cout << "ERROR: " << L.at<double>(i,j) << endl;
             return false;
           }
         }
@@ -749,7 +739,7 @@ double NewtonRaphson(const Mat &A, const Mat &B,
     double fx = function(A,B,Ap,Bp, current);
     double dfx = derivative(A,B,Ap,Bp, current);
 
-
+    cout << "\n\nPrimera aproximación de z = " << current << " con derivada = " << fx << endl;
     int iterations = 0;
 
     do {
@@ -759,11 +749,10 @@ double NewtonRaphson(const Mat &A, const Mat &B,
         fx = function(A,B,Ap,Bp, current);
         dfx = derivative(A,B,Ap,Bp, current);
 
-        cout << ROJO << fx << RESET << endl;
         iterations++;
     } while (abs(fx) > 1e-15 && iterations < 150);
     // Double-precision values have 15 stable decimal positions
-
+    cout << "Aproximación mejorada de z = " << current << " con derivada = " << fx << "\n" << endl;
     return current;
 }
 
