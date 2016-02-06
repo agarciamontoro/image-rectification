@@ -26,7 +26,7 @@ int main(){
     // Malas: cactus{1-2} madera{3-4,4-5,5-6}, perra{3-4,5-6}
     // Regulares: cactus{2-3}, nazaries{1-2}, cubo{1-2, 2-3}
 
-    Mat fund_mat;
+    Mat fund_mat = Mat::zeros(3,3,CV_64F);
 
     Vec3d epipole;
 
@@ -181,9 +181,24 @@ int main(){
     // Apply homographies
     Mat img_1_dst(img_1_rows, img_1_cols, CV_64F);
     Mat img_2_dst(img_2_rows, img_2_cols, CV_64F);
+    // drawEpilines(img_1, img_2, lines_1, lines_2, good_matches_1, good_matches_2, 150);
 
     warpPerspective( img_1, img_1_dst, H, img_1_dst.size() );
     warpPerspective( img_2, img_2_dst, Hp, img_2_dst.size() );
+
+    Vec3d epipole_dst;
+
+    vector<Vec3d> lines_1_dst, lines_2_dst;
+    vector<Point2d> good_matches_1_dst, good_matches_2_dst;
+
+    perspectiveTransform(good_matches_1, good_matches_1_dst, H);
+    perspectiveTransform(good_matches_2, good_matches_2_dst, Hp);
+
+    // Get epipolar geometry and draw epilines
+    computeEpiLines(img_1_dst, img_2_dst, epipole_dst, fund_mat, lines_1_dst, lines_2_dst, good_matches_1_dst, good_matches_2_dst);
+
+    drawEpilines(img_1, img_2, lines_1, lines_2, good_matches_1, good_matches_2, 150);
+    drawEpilines(img_1_dst, img_2_dst, lines_1_dst, lines_2_dst, good_matches_1_dst, good_matches_2_dst, 150);
 
     draw(img_1, "1");
     draw(img_1_dst, "1 proyectada");

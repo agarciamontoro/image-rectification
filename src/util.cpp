@@ -26,8 +26,18 @@ string type2str(int type) {
 
 double computeEpiLines(Mat &one, Mat &other, Vec3d &epipole, Mat &fund_mat, vector<Vec3d> &lines_1, vector<Vec3d> &lines_2, vector<Point2d> &good_matches_1,vector<Point2d> &good_matches_2){
 
-    fund_mat = fundamentalMat(one, other, good_matches_1, good_matches_2);
-    // fund_mat = manualFundMat(good_matches_1, good_matches_2);
+    // Get a matrix with non-zero values at points where the
+    // two matrices have different values
+    Mat diff = fund_mat != Mat::zeros(3,3,CV_64F);
+    // Equal if no elements disagree
+    bool eq = countNonZero(diff) == 0;
+    if (eq)
+    {
+      cout << "NOT INITIALIZED!" << endl;
+      fund_mat = fundamentalMat(one, other, good_matches_1, good_matches_2);
+      // fund_mat = manualFundMat(good_matches_1, good_matches_2);
+      //
+    }
 
     computeCorrespondEpilines(good_matches_1, 1, fund_mat, lines_2);
     computeCorrespondEpilines(good_matches_2, 2, fund_mat, lines_1);
