@@ -252,6 +252,8 @@
 
     Desarrollando la expresión descrita en \ref{eq_minz} obtenemos un polinomio en $\lambda$ cuyo mínimo es el valor que buscamos. Este mínimo se alcanza cuando su derivada con respecto a $\lambda$ es cero, así que todo nuestro problema se reduce a encontrar esta raíz.
 
+    \subsection{Primera aproximación a la raíz}
+
     En \cite{LoopZhang} se da una primera aproximación a esta raíz, cuyo cálculo consiste en minimizar por separado ambos sumandos y tomar la media normalizada de las dos soluciones.
 
     De nuevo, allí se encuentra toda la discusión matemática, que se reduce a hacer lo siguiente para ambos sumandos:
@@ -354,6 +356,16 @@
     La línea \ref{comprobacion} es la que evita los errores de redondeo descritos anteriormente. Cuando se intenta realizar la raíz cuadrada de un elemento, primero se comprueba si es negativo. En caso de serlo, se debe lanzar un fallo, a no ser que el valor sea muy cercano a cero; en esa situación, simplemente tomamos el valor opuesto y seguimos el algoritmo con naturalidad.
 
     En este punto del proceso tenemos una primera aproximación a la raíz que necesitamos, muy cercana a la real según \cite{LoopZhang} pero que puede ser optimizada.
+
+    \subsection{Optimización de la raíz}
+    El problema de encontrar una raíz de un polinomio está intensamente documentado en la literatura, y uno de los mejores algoritmos para abordar este problema es el de Newton-Raphson.
+
+    Para implementarlo, hace falta simplemente la función cuya raíz queremos encontrar, su derivada y una primera aproximación.
+
+    La función cuya raíz queremos encontrar es la derivada con respecto a $\lambda$ de la expresión \ref{eq_minz}. Esta función, tomando como parámetros $A$, $B$, $A'$ y $B'$ es la siguiente:
+    \[
+    (2*a'_{0,0}*x+a'_{1,0}+a'_{0,1})/(x*(b'_{0,0}*x+b'_{0,1})+b'_{1,0}*x+b'_{1,1})-((2*b'_{0,0}*x+b'_{1,0}+b'_{0,1})*(x*(a'_{0,0}*x+a'_{0,1})+a'_{1,0}*x+a'_{1,1}))/(x*(b'_{0,0}*x+b'_{0,1})+b'_{1,0}*x+b'_{1,1})^2+(2*a_{0,0}*x+a_{1,0}+a_{0,1})/(x*(b_{0,0}*x+b_{0,1})+b_{1,0}*x+b_{1,1})-((2*b_{0,0}*x+b_{1,0}+b_{0,1})*(x*(a_{0,0}*x+a_{0,1})+a_{1,0}*x+a_{1,1}))/(x*(b_{0,0}*x+b_{0,1})+b_{1,0}*x+b_{1,1})^2
+    \]
 
     \subsection{Transformación de semejanza}
     Euclídea
