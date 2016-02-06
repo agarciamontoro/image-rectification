@@ -54,9 +54,9 @@ string type2str(int type);
  * @param[out]  fund_mat  Computed fundamental mat.
  * @return           Error of the epilines with the correspondences.
  */
-double computeAndDrawEpiLines(Mat &one, Mat &other, int num_lines, Vec3d &epipole, Mat &fund_mat);
+double computeEpiLines(Mat &one, Mat &other, Vec3d &epipole, Mat &fund_mat, vector<Vec3d> &lines_1, vector<Vec3d> &lines_2, vector<Point2d> &good_matches_1,vector<Point2d> &good_matches_2);
 
-
+void drawEpilines(Mat &one, Mat &other, vector<Vec3d> &lines_1, vector<Vec3d> &lines_2, vector<Point2d> &good_matches_1, vector<Point2d> &good_matches_2, int num_lines);
 /**
  * Computes fundamental matrix from two images.
  * @param[in]  one            First image.
