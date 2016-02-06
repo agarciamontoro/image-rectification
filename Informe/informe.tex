@@ -11,7 +11,7 @@
 \usepackage{hyperref}
 
 \newcommand\fnurl[2]{%
-  \href{#2}{#1}\footnote{\url{#2}}%
+\href{#2}{#1}\footnote{\url{#2}}%
 }
 
 \newcommand{\includecode}[2][c]{\lstinputlisting[caption=#2, escapechar=, style=custom#1]{#2}<!---->}
@@ -38,48 +38,48 @@
 \definecolor{listinggray}{gray}{0.9}
 \definecolor{lbcolor}{rgb}{0.9,0.9,0.9}
 \lstset{
-backgroundcolor=\color{lbcolor},
-    tabsize=4,
-rulecolor=,
-    language=[GNU]C++,
-        basicstyle=\scriptsize,
-        upquote=true,
-        aboveskip={1.5\baselineskip},
-        columns=fixed,
-        showstringspaces=false,
-        extendedchars=false,
-        breaklines=true,
-        prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
-        frame=single,
-        numbers=left,
-        showtabs=false,
-        showspaces=false,
-        showstringspaces=false,
-        identifierstyle=\ttfamily,
-        keywordstyle=\color[rgb]{0,0,1},
-        commentstyle=\color[rgb]{0.026,0.112,0.095},
-        stringstyle=\color[rgb]{0.627,0.126,0.941},
-        numberstyle=\color[rgb]{0.205, 0.142, 0.73},
-%        \lstdefinestyle{C++}{language=C++,style=numbers}’.
-}
-\lstset{
     backgroundcolor=\color{lbcolor},
     tabsize=4,
-  language=C++,
-  captionpos=b,
-  tabsize=3,
-  frame=lines,
-  numbers=left,
-  numberstyle=\tiny,
-  numbersep=5pt,
-  breaklines=true,
-  showstringspaces=false,
-  basicstyle=\footnotesize,
-%  identifierstyle=\color{magenta},
-  keywordstyle=\color[rgb]{0,0,1},
-  commentstyle=\color[rgb]{0.026,0.112,0.095}, % Darkgreen
-  stringstyle=\color{red}
-  }
+    rulecolor=,
+    language=[GNU]C++,
+    basicstyle=\scriptsize,
+    upquote=true,
+    aboveskip={1.5\baselineskip},
+    columns=fixed,
+    showstringspaces=false,
+    extendedchars=false,
+    breaklines=true,
+    prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+    frame=single,
+    numbers=left,
+    showtabs=false,
+    showspaces=false,
+    showstringspaces=false,
+    identifierstyle=\ttfamily,
+    keywordstyle=\color[rgb]{0,0,1},
+    commentstyle=\color[rgb]{0.026,0.112,0.095},
+    stringstyle=\color[rgb]{0.627,0.126,0.941},
+    numberstyle=\color[rgb]{0.205, 0.142, 0.73
+%   \lstdefinestyle{C++}{language=C++,style=numbers}’.
+}
+\{
+    backgroundcolor=\color{lbcolor},
+    tabsize=4,
+    language=C++,
+    captionpos=b,
+    tabsize=3,
+    frame=lines,
+    numbers=left,
+    numberstyle=\tiny,
+    numbersep=5pt,
+    breaklines=true,
+    showstringspaces=false,
+    basicstyle=\footnotesize,
+    %  identifierstyle=\color{magenta},
+    keywordstyle=\color[rgb]{0,0,1},
+    commentstyle=\color[rgb]{0.026,0.112,0.095}, % Darkgreen
+    stringstyle=\color{red},
+}
 % Slightly bigger margins than the latex defaults
 
 \geometry{verbose,tmargin=1in,bmargin=1in,lmargin=1in,rmargin=1in}
@@ -107,28 +107,28 @@ rulecolor=,
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \hypersetup{
-  pdftitle={Informe de proyecto: Implementación del algoritmo de rectificación de Loop \& Zhang},
-  pdfauthor={Antonio Álvarez Caballero, Alejandro García Montoro},
-  unicode,
-  breaklinks=true,  % so long urls are correctly broken across lines
-  colorlinks=true,
-  urlcolor=blue,
-  linkcolor=blue,
-  citecolor=darkgreen,
-  }
+    pdftitle={Informe de proyecto: Implementación del algoritmo de rectificación de Loop \& Zhang},
+    pdfauthor={Antonio Álvarez Caballero, Alejandro García Montoro},
+    unicode,
+    breaklinks=true,  % so long urls are correctly broken across lines
+    colorlinks=true,
+    urlcolor=blue,
+    linkcolor=blue,
+    citecolor=darkgreen,
+}
 
 \title{Informe de proyecto: \\ Implementación del algoritmo de rectificación de Loop \& Zhang}
 \author{Antonio Álvarez Caballero \\ Alejandro García Montoro \\
-    \href{mailto:analca3@correo.ugr.es}{analca3@correo.ugr.es} \\
-    \href{mailto:agarciamontoro@correo.ugr.es}{agarciamontoro@correo.ugr.es}}
+\href{mailto:analca3@correo.ugr.es}{analca3@correo.ugr.es} \\
+\href{mailto:agarciamontoro@correo.ugr.es}{agarciamontoro@correo.ugr.es}}
 \date{}
 %%%%%%%%%%%%%%%%% FIN PREAMBULO %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
 
-  \maketitle
+    \maketitle
 
-  \section{Descripción del problema}
+    \section{Descripción del problema}
 
     La rectificación de imágenes es el proceso de aplicar sendas homografías a un par de imágenes cuya geometría epipolar conocemos, de modo que las líneas epipolares queden horizontales, paralelas entre sí y con la misma coordenada vertical.
 
@@ -136,9 +136,7 @@ rulecolor=,
 
     Así, es claro que tener un par de imágenes rectificadas mejora la eficiencia de muchos de los algoritmos que precisan conocer la geometría epipolar y tienen que buscar correspondencias entre ambas imágenes. Por ejemplo, de esta situación se consigue la mejora computacional de los algoritmos que calculan mapas de disparidad, donde hay que medir el desplazamiento relativo entre los píxeles de una y otra imagen. Esta distancia relativa es lo que conocemos por \emph{disparidad}, y con esta información se puede reconstruir la profundidad incluso sin noción alguna de cámaras; basta un par de imágenes de una misma escena estática.
 
-    \subsection{Solución implementada}
-
-    Este proyecto implementa el método propuesto por \emph{Charles Loop} y \emph{Zhengyou Zhang} en \cite{LoopZhang}.
+    Este proyecto implementa el método de rectificación propuesto por Charles Loop y Zhengyou Zhang en \cite{LoopZhang}.
 
     Su algoritmo es totalmente geométrico y no precisa conocimiento de las cámaras.
     Se consigue descomponiendo la homografía que se desea calcular para cada imagen en una proyección, una transformación euclídea y una cizalla, con especial cuidado en minimizar la distorsión del resultado con respecto a las imágenes originales.
@@ -155,29 +153,73 @@ rulecolor=,
         \item $H_s$: composición de una transformación de cizalla con un escalado y una traslación.
     \end{itemize}
 
+    \subsection{Descomposición}
+    Siguiendo la notación de \cite{LoopZhang}, sea $H$ la homografía siguiente:
+    \[
+    H =
+    \begin{pmatrix}
+        u_a & u_b & u_c \\
+        v_a & v_b & v_c \\
+        w_a & w_b & w_c
+    \end{pmatrix}
+    \]
 
+    Si descomponemos $H$ en su parte proyectiva y afín ---y esta a su vez en una parte de semejanza y otra de cizalla---, obtenemos que
+    \[
+    H = H_s H_r H_p
+    \]
+    donde
+    \[
+    H_s =
+    \begin{pmatrix}
+        s_a & s_b & s_c \\
+        0 & 1 & 0 \\
+        0 & 0 & 1
+    \end{pmatrix};\;\;
+    H_r =
+    \begin{pmatrix}
+        v_b - v_c w_b & v_c w_a - v_a & 0 \\
+        v_a - v_c w_a & v_b - v_c w_b & v_c \\
+        0 & 0 & 1
+    \end{pmatrix};\;\;
+    H_p =
+    \begin{pmatrix}
+        1 & 0 & 0 \\
+        0 & 1 & 0 \\
+        w_a & w_b & 1
+    \end{pmatrix}
+    \]
 
-     nada de orientación
-      a objetos. Se han calculado las transformaciones por separado.
+    El cálculo de cada transformación se hace por separado, teniendo en cuenta las matrices calculadas anteriormente y criterios de minimización que se explicarán en cada subsección.
 
-      \subsection{Transformación proyectiva}
-      Proyectiva
+    Antes de todo este cálculo, sin embargo, hace falta calcular la geometría epipolar del par de imágenes, que el algoritmo supone conocida. Este paso previo se ha implementado buscando las correspondencias con un detector \lstinline{BRISK}, calculando la matriz fundamental con la llamada a la función \lstinline{findFundamentalMat} de \emph{OpenCV}---usando el algoritmo de los 8 puntos y \lstinline{RANSAC}--- y usando las llamadas a \lstinline{computeCorrespondEpilines} de la misma librería.
 
-      \subsection{Transformación de semejanza}
-      Euclídea
+    \subsection{Transformación proyectiva}
+    La transformación proyectiva lleva los epipolos $e$ y $e'$ al infinito, de manera que tras aplicar $H_p$ y $H'_p$, las líneas epipolares son ya paralelas.
 
-      \subsection{Transformación de cizalla}
+    El cálculo de $w_a$, $w_b$ y  $w'_a$, $w'_b$ se basa en un criterio de minimización de la distorsión que puede resumirse en lo siguiente: buscamos unas transformaciones proyectivas $H_p$ y $H'_p$ que sean lo más cercanas que podamos a transformaciones afines.
+
+    La idea es que las líneas $w = [w_a, w_b, 1]$ y $w' = [w'_a, w'_b, 1]$ transformen los puntos de la manera más compensada posible; es decir, dado un punto $p_i = [p_{i,u}, p_{i,v}, 1]$, la transformación $H_p$ lo transformará en el punto $[\frac{p_{i,u}}{\omega_i}, \frac{p_{i,v}}{\omega_i}, 1]$, donde los pesos $\omega_i$ pueden medir de alguna manera cuán proyectiva es nuestra transformación: si todos los pesos son idénticos, la transformación es afín.
+
+    Buscamos por tanto unas líneas $w$ y $w'$ que consigan que los pesos $\omega_i$ se parezcan todo lo posible.
+
+    Toda la discusión matemática se encuentra en \cite{LoopZhang}, pero
+
+    \subsection{Transformación de semejanza}
+    Euclídea
+
+    \subsection{Transformación de cizalla}
 
     \section{Experimentos realizados}
 
-      Lola es muy guapa y adorable. V impone.
+    Lola es muy guapa y adorable. V impone.
 
     \section{Valoración de resultados}
 
-      Todo se ve de lujo
+    Todo se ve de lujo
 
     \section{Conclusiones}
 
-      Este algoritmo es pro. Mejor que el de OpenCV.
+    Este algoritmo es pro. Mejor que el de OpenCV.
 
 \end{document}
