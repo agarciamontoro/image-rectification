@@ -11,28 +11,15 @@ using namespace std;
 
 int main(){
     /****************** EPIPOLAR GEOMETRY **************************/
-    // Mat img_1 = imread("img/Vmort1.pgm");
-    // Mat img_2 = imread("img/Vmort2.pgm");
 
-    // Mat img_1 = imread("img/monitogo.png");
-    // Mat img_2 = imread("img/monitogo2.png");
+    // Mat img_1 = imread("img/img1.png");
+    // Mat img_2 = imread("img/img2.png");
 
-    // Mat img_1 = imread("Dropbox/Universidad/Vision por Computador/Foticos/img1.png");
-    // Mat img_2 = imread("Dropbox/Universidad/Vision por Computador/Foticos/img2.png");
+    // Mat img_1 = imread("img/perra_7.jpg");
+    // Mat img_2 = imread("img/perra_8.jpg");
 
-    // Mat img_1 = imread("Dropbox/Universidad/Vision por Computador/Foticos/perra_7.jpg");
-    // Mat img_2 = imread("Dropbox/Universidad/Vision por Computador/Foticos/perra_8.jpg");
-
-    Mat img_1 = imread("Dropbox/Universidad/Vision por Computador/Foticos/madera_1.jpg");
-    Mat img_2 = imread("Dropbox/Universidad/Vision por Computador/Foticos/madera_2.jpg");
-
-    // Mat img_1 = imread("Dropbox/Universidad/Vision por Computador/Foticos/madera_1.jpg");
-    // Mat img_2 = imread("Dropbox/Universidad/Vision por Computador/Foticos/madera_2.jpg");
-
-
-    // Buenas: madera{1-2}, perra{1-2,7-8,8-9}
-    // Malas: cactus{1-2} madera{3-4,4-5,5-6}, perra{3-4,5-6}
-    // Regulares: cactus{2-3}, nazaries{1-2}, cubo{1-2, 2-3}
+    Mat img_1 = imread("img/madera_1.jpg");
+    Mat img_2 = imread("img/madera_2.jpg");
 
     Mat fund_mat = Mat::zeros(3,3,CV_64F);
 
@@ -208,7 +195,7 @@ int main(){
     drawEpilines(img_1_dst, img_2_dst, lines_1_dst, lines_2_dst, good_matches_1_dst, good_matches_2_dst, 150);
 
     draw(img_1, "1");
-    draw(img_1_dst, "1 proyectada");
+    draw(img_1_dst, "1 rectificada");
 
     char c = 'a';
 
@@ -218,7 +205,7 @@ int main(){
     // destroyAllWindows();
 
     draw(img_2, "2");
-    draw(img_2_dst, "2 proyectada");
+    draw(img_2_dst, "2 rectificada");
 
     c = 'a';
 
