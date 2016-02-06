@@ -26,35 +26,7 @@ string type2str(int type) {
 
 double computeEpiLines(Mat &one, Mat &other, Vec3d &epipole, Mat &fund_mat, vector<Vec3d> &lines_1, vector<Vec3d> &lines_2, vector<Point2d> &good_matches_1,vector<Point2d> &good_matches_2){
 
-    // Get a matrix with non-zero values at points where the
-    // two matrices have different values
-    Mat diff = fund_mat != Mat::zeros(3,3,CV_64F);
-    // Equal if no elements disagree
-    bool eq = countNonZero(diff) == 0;
-    if (eq)
-    {
-      cout << "NOT INITIALIZED!" << endl;
-      fund_mat = fundamentalMat(one, other, good_matches_1, good_matches_2);
-      // fund_mat = manualFundMat(good_matches_1, good_matches_2);
-    }
-    else{
-        vector<unsigned char> mask;
-        fund_mat = findFundamentalMat(good_matches_1, good_matches_2,
-                                      CV_FM_8POINT,
-                                      1., 0.99, mask );
-
-        vector<Point2d> final_1, final_2;
-
-        for (size_t i = 0; i < mask.size(); i++) {
-            if(mask[i] == 1){
-                final_1.push_back(good_matches_1[i]);
-                final_2.push_back(good_matches_2[i]);
-            }
-        }
-
-        good_matches_1 = vector<Point2d>(final_1);
-        good_matches_2 = vector<Point2d>(final_2);
-    }
+    fund_mat = fundamentalMat(one, other, good_matches_1, good_matches_2);
 
     computeCorrespondEpilines(good_matches_1, 1, fund_mat, lines_2);
     computeCorrespondEpilines(good_matches_2, 2, fund_mat, lines_1);
@@ -145,20 +117,38 @@ Mat fundamentalMat(Mat &one, Mat &other,
 
     pair<vector<Point2d>, vector<Point2d> > matches;
     Mat F;
-
-    matches = match(one, other, descriptor_id::BRUTE_FORCE, detector_id::BRISK);
-
     vector<unsigned char> mask;
-    F = findFundamentalMat(matches.first, matches.second,
-                           CV_FM_8POINT | CV_FM_RANSAC,
+
+    vector<Point2d> first, second;
+    int flag = CV_FM_8POINT;
+
+    if (good_matches_1.empty() && good_matches_2.empty()){
+      matches = match(one, other, descriptor_id::BRUTE_FORCE, detector_id::BRISK);
+      first = matches.first;
+      second = matches.second;
+      flag |= CV_FM_RANSAC;
+    }
+    else{
+      first = good_matches_1;
+      second = good_matches_2;
+    }
+
+
+    F = findFundamentalMat(first, second,
+                           flag,
                            1., 0.99, mask );
 
+    vector<Point2d> final_1, final_2;
+
     for (size_t i = 0; i < mask.size(); i++) {
-        if(mask[i] == 1){
-            good_matches_1.push_back(matches.first[i]);
-            good_matches_2.push_back(matches.second[i]);
-        }
+       if(mask[i] == 1){
+           final_1.push_back(first[i]);
+           final_2.push_back(second[i]);
+       }
     }
+
+    good_matches_1 = vector<Point2d>(final_1);
+    good_matches_2 = vector<Point2d>(final_2);
 
     return F;
 }
