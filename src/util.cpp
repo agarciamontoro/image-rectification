@@ -40,7 +40,7 @@ double computeEpiLines(Mat &one, Mat &other, Vec3d &epipole, Mat &fund_mat, vect
     else{
         vector<unsigned char> mask;
         fund_mat = findFundamentalMat(good_matches_1, good_matches_2,
-                                      CV_FM_8POINT | CV_FM_RANSAC,
+                                      CV_FM_8POINT,
                                       1., 0.99, mask );
 
         vector<Point2d> final_1, final_2;
