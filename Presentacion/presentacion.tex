@@ -1,0 +1,157 @@
+\documentclass[aspectratio=169,14pt,spanish]{beamer}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel} % Changes theorem->teorema, proof->demostración...
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%% CONFIGURATION %%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usetheme{default}
+\setbeamertemplate{navigation symbols}{} % Removes the navigation symbols :_)
+
+% Opens the PDF document in full screen by default :)
+\hypersetup{pdfpagemode=FullScreen}
+
+%Language
+\selectlanguage{spanish}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%% TITLE %%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title[Rectificación]{Rectificación de un par estéreo}
+\subtitle[Implementación de Loop Zhang]{Implementación del algoritmo de Loop Zhang}
+\author[A. A. Caballero, A. G. Montoro]{Antonio Álvarez Caballero, Alejandro García Montoro}
+\institute[UGR]{Universidad de Granada}
+\date{\today}
+
+% Frame whenever a new section begins
+\AtBeginSection[]{
+    \begin{frame}[plain]
+        \begin{center}
+            \huge{\insertsection}
+        \end{center}
+    \end{frame}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%% COLORS %%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%% DECLARATIONS %%%%%%%%%%%%%%%%%
+
+\definecolor{c_gray_l}{HTML}{FAFAFA} % background light gray
+\definecolor{c_metal}{HTML}{37474F}  % background dark metal blue
+
+%%%%%%%%%%%%%%%% DEFINITIONS %%%%%%%%%%%%%%%%%*
+
+\setbeamercolor*{default}{
+    bg=c_metal,
+    fg=c_gray_l
+}
+
+\setbeamercolor*{palette primary}{
+    parent=default
+}
+
+\setbeamercolor*{palette secondary}{
+    bg=c_gray_l,
+    fg=c_metal
+}
+
+\setbeamercolor*{background canvas}{
+    parent = palette primary
+}
+
+\setbeamercolor*{normal text}{
+    fg = c_gray_l
+}
+
+\setbeamercolor*{titlelike}{
+    parent = palette secondary
+}
+
+\setbeamercolor*{section in toc}{
+    parent = palette primary
+}
+
+\setbeamercolor*{block title alerted}{
+    bg = red!60,
+    fg = c_gray_l
+}
+
+\setbeamercolor*{block body alerted}{
+    parent = palette secondary
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%% DOCUMENT %%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+    \titlepage
+
+    \begin{frame}[t]{Contenidos}
+        \tableofcontents
+    \end{frame}
+    %--- Next Frame ---%
+
+    \section{Primera sección}
+
+    \begin{frame}{Título 1}{Subtítulo 1.1}
+        \alert{Una alerta}
+
+        \begin{itemize}
+            \item Primer ítem
+            \item Segundo ítem
+            \item Tercer ítem
+        \end{itemize}
+
+        \begin{block}{Título de bloque}
+            Texto en bloque
+        \end{block}
+    \end{frame}
+    %--- Next Frame ---%
+
+    \section{Segunda sección}
+
+    \begin{frame}{Título 2}{Subtítulo 2.1}
+        \begin{enumerate}
+            \item Primer ítem
+            \item Segundo ítem
+            \item Tercer ítem
+        \end{enumerate}
+
+        \begin{alertblock}{Título de bloque alerta}
+            Texto en bloque alerta
+        \end{alertblock}
+    \end{frame}
+    %--- Next Frame ---%
+
+    \subsection{Subsección}
+
+    \begin{frame}{Título 2}{Subtítulo 2.2}
+        \begin{exampleblock}{Título de bloque ejemplo}
+            Texto en bloque ejemplo
+        \end{exampleblock}
+
+        \begin{description}[<+->]
+            \item [Primer ítem] Descripción 1
+            \item [Segundo ítem] Descripción 2
+            \item [Tercer ítem] Descripción 3
+        \end{description}
+    \end{frame}
+    %--- Next Frame ---%
+
+    \begin{frame}{Título 2}{Subtítulo 2.3}
+        \begin{overlayarea}{\textwidth}{3cm}
+            \only<1> {Lorem ipsum dolor sit amet.}
+            \only<2->{Fusce pretium ullamcorper neque sit amet luctus.}
+        \end{overlayarea}
+    \end{frame}
+    %--- Next Frame ---%
+
+\end{document}
