@@ -1,4 +1,4 @@
-\documentclass[14pt,spanish]{beamer}
+\documentclass[aspectratio=169,14pt,spanish]{beamer}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -197,7 +197,7 @@
             % \begin{exampleblock}{Título de bloque ejemplo}
             %     Texto en bloque ejemplo
             % \end{exampleblock}
-            Maximizar por separado el inverso de cada sumando y tomar la media de sus normalizados.
+            Maximizar por separado el inverso de cada sumando ---de lo que obtenemos dos vectores $z_1$ y $z_2$--- y tomar la media de esas soluciones:
             \[
             z = \frac{1}{2}\left(\frac{z_1}{\lVert z_1 \rVert} + \frac{z_2}{\lVert z_2 \rVert}\right)
             \]
@@ -322,7 +322,7 @@
           \begin{frame}{Transformación de cizalla}{Escalado y traslación}
               Criterios usados:
               \begin{itemize}
-                  \item Mantener la suma de las áreas de las imágenes $\Longrightarrow$ Factor de escala $s = \sqrt{\frac{A}{A'}}$, con $A$ la suma de áreas originales y $A'$ la suma de áreas tras proyectar.
+                  \item Mantener la suma de las áreas de las imágenes $\Longrightarrow$ Factor de escala $s = \sqrt{\frac{A}{A'}}$, con $A$ la suma de áreas originales y $A'$ la suma de áreas tras proyectar. ¡Cuidado si se invierte la imagen!
                   \item Aplicar traslación horizontal a cada imagen independientemente para que la mínima coordenada horizontal sea cero.
                   \item Aplicar traslación vertical común a ambas imágenes para que la mínima coordenada vertical de \emph{las dos} imágenes sea cero.
               \end{itemize}
@@ -349,7 +349,7 @@
                 \begin{column}{0.8\textwidth}
                   Epipolo
 
-                  $[5868.93, -278.987, 1]$
+                  $[5868.93; -278.987; 1]$
                 \end{column}
               \end{columns}
 
@@ -371,7 +371,7 @@
                 \begin{column}{0.8\textwidth}
                   Epipolo
 
-                  $[0.999998, -0.002162, -1.76364e-05]$
+                  $[0.999998; -0.002162; -1.76364e-05]$
                 \end{column}
               \end{columns}
 
@@ -397,7 +397,7 @@
               \begin{column}{0.8\textwidth}
                 Epipolo
 
-                $[-9167.01, -551.777, 1]$
+                $[-9167.01; -551.777; 1]$
               \end{column}
             \end{columns}
 
@@ -419,7 +419,7 @@
               \begin{column}{0.8\textwidth}
                 Epipolo
 
-                $[0.9999, -0.0014679, -2.12774e-06]$
+                $[0.9999; -0.0014679; -2.12774e-06]$
               \end{column}
             \end{columns}
 
@@ -447,7 +447,7 @@
               \begin{column}{0.8\textwidth}
                 Epipolo
 
-                $[2214.98, 523.468, 1]$
+                $[2214.98; 523.468; 1]$
               \end{column}
             \end{columns}
 
@@ -469,7 +469,7 @@
               \begin{column}{0.8\textwidth}
                 Epipolo
 
-                $[0.999999, 0.00120902, 7.31557e-06]$
+                $[0.999999; 0.00120902; 7.31557e-06]$
               \end{column}
             \end{columns}
 
