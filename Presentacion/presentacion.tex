@@ -12,7 +12,7 @@
 \setbeamertemplate{navigation symbols}{} % Removes the navigation symbols :_)
 
 % Opens the PDF document in full screen by default :)
-\hypersetup{pdfpagemode=FullScreen}
+%\hypersetup{pdfpagemode=FullScreen}
 
 %Language
 \selectlanguage{spanish}
@@ -22,7 +22,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \title[Rectificación]{Rectificación de un par estéreo}
-\subtitle[Implementación de Loop Zhang]{Implementación del algoritmo de Loop Zhang}
+\subtitle[Implementación de Loop Zhang]{Implementación del algoritmo de Loop \& Zhang}
 \author[A. A. Caballero, A. G. Montoro]{Antonio Álvarez Caballero, Alejandro García Montoro}
 \institute[UGR]{Universidad de Granada}
 \date{\today}
@@ -99,59 +99,152 @@
     \end{frame}
     %--- Next Frame ---%
 
-    \section{Primera sección}
+    \section{Descripción del problema}
 
-    \begin{frame}{Título 1}{Subtítulo 1.1}
-        \alert{Una alerta}
+    \begin{frame}{Descripción del problema}{}
+        %\alert{Una alerta}
 
         \begin{itemize}
-            \item Primer ítem
-            \item Segundo ítem
-            \item Tercer ítem
+            \item Rectificación: Aplicar homografías a par estéreo para que las líneas
+              epipolares queden horizontales y paralelas.
+            \item Búsqueda de correspondencias eficiente: Sólo buscamos en una fila
+              horizontal de píxeles.
+            \item Mapas de disparidad, reconstrucción de profundidad.
+            \item El método propuesto por \emph{Loop \& Zhang} no precisa de un sistema
+              de cámaras calibrado.
+            \item Minimizar la distorsión.
         \end{itemize}
 
-        \begin{block}{Título de bloque}
-            Texto en bloque
-        \end{block}
+        % \begin{block}{Título de bloque}
+        %     Texto en bloque
+        % \end{block}
     \end{frame}
     %--- Next Frame ---%
 
-    \section{Segunda sección}
+    \section{Detalles de la implementación}
 
-    \begin{frame}{Título 2}{Subtítulo 2.1}
+    \begin{frame}{Detalles de la implementación}{}
+      Descomposición de las homografías en transformaciones sencillas.
+      Suponiendo que conocemos la geometría epipolar, calculamos:
         \begin{enumerate}
-            \item Primer ítem
-            \item Segundo ítem
-            \item Tercer ítem
+            \item Transformación proyectiva.
+            \item Tranformación de semejanza.
+            \item Transformación de cizalla
         \end{enumerate}
 
-        \begin{alertblock}{Título de bloque alerta}
-            Texto en bloque alerta
-        \end{alertblock}
+        La homografía final queda $H_s * H_r * H_p$
+
+        % \begin{alertblock}{Título de bloque alerta}
+        %     Texto en bloque alerta
+        % \end{alertblock}
     \end{frame}
     %--- Next Frame ---%
 
-    \subsection{Subsección}
+    \subsection{Transformación proyectiva}
 
-    \begin{frame}{Título 2}{Subtítulo 2.2}
-        \begin{exampleblock}{Título de bloque ejemplo}
-            Texto en bloque ejemplo
-        \end{exampleblock}
+      %Cálculo de transformación proyectiva
 
-        \begin{description}[<+->]
-            \item [Primer ítem] Descripción 1
-            \item [Segundo ítem] Descripción 2
-            \item [Tercer ítem] Descripción 3
-        \end{description}
+      \subsubsection{Primera aproximación a la raíz}
+
+        \begin{frame}{Transformación proyectiva}{Primera aproximación a la raíz}
+            % \begin{exampleblock}{Título de bloque ejemplo}
+            %     Texto en bloque ejemplo
+            % \end{exampleblock}
+
+            \begin{description}[<+->]
+                \item [Primer ítem] Descripción 1
+                \item [Segundo ítem] Descripción 2
+                \item [Tercer ítem] Descripción 3
+            \end{description}
+        \end{frame}
+        %--- Next Frame ---%
+      \subsubsection{Optimización de la raíz con Newton-Raphson}
+
+        \begin{frame}{Transformación proyectiva}{Optimización de la raíz con Newton-Raphson}
+            \begin{overlayarea}{\textwidth}{3cm}
+                \only<1> {Lorem ipsum dolor sit amet.}
+                \only<2->{Fusce pretium ullamcorper neque sit amet luctus.}
+            \end{overlayarea}
+        \end{frame}
+        %--- Next Frame ---%
+        \subsubsection{Construcción de la proyección}
+
+          \begin{frame}{Transformación proyectiva}{Construcción de la proyección}
+              % \begin{exampleblock}{Título de bloque ejemplo}
+              %     Texto en bloque ejemplo
+              % \end{exampleblock}
+
+              \begin{description}[<+->]
+                  \item [Primer ítem] Descripción 1
+                  \item [Segundo ítem] Descripción 2
+                  \item [Tercer ítem] Descripción 3
+              \end{description}
+          \end{frame}
+      \subsection{Transformación de semejanza}
+
+        \begin{frame}{Transformación de semejanza}
+          Cálculo de semejanza
+
+        \end{frame}
+
+      \subsection{Transformación de cizalla}
+
+        \subsubsection{Reducción de distorsión}
+          \begin{frame}{Transformación de cizalla}{Reducción de distorsión}
+              % \begin{exampleblock}{Título de bloque ejemplo}
+              %     Texto en bloque ejemplo
+              % \end{exampleblock}
+
+              \begin{description}[<+->]
+                  \item [Primer ítem] Descripción 1
+                  \item [Segundo ítem] Descripción 2
+                  \item [Tercer ítem] Descripción 3
+              \end{description}
+          \end{frame}
+
+        \subsubsection{Escalado y traslación}
+          \begin{frame}{Transformación de cizalla}{Escalado y traslación}
+              % \begin{exampleblock}{Título de bloque ejemplo}
+              %     Texto en bloque ejemplo
+              % \end{exampleblock}
+
+              \begin{description}[<+->]
+                  \item [Primer ítem] Descripción 1
+                  \item [Segundo ítem] Descripción 2
+                  \item [Tercer ítem] Descripción 3
+              \end{description}
+          \end{frame}
+
+
+
+
+    \section{Pruebas y valoración de resultados}
+
+      \begin{frame}{Pruebas y valoración de resultados}{Prueba 1}
+
+
+      \end{frame}
+
+      \begin{frame}{Pruebas y valoración de resultados}{Prueba 2}
+
+
+      \end{frame}
+
+      \begin{frame}{Pruebas y valoración de resultados}{Prueba 3}
+
+
+      \end{frame}
+
+    \section{Conclusiones}
+
+    \begin{frame}{Conclusiones}{Algo?}
+
+
     \end{frame}
-    %--- Next Frame ---%
 
-    \begin{frame}{Título 2}{Subtítulo 2.3}
-        \begin{overlayarea}{\textwidth}{3cm}
-            \only<1> {Lorem ipsum dolor sit amet.}
-            \only<2->{Fusce pretium ullamcorper neque sit amet luctus.}
-        \end{overlayarea}
+    \begin{frame}
+
+      Preguntas?
     \end{frame}
-    %--- Next Frame ---%
 
 \end{document}
