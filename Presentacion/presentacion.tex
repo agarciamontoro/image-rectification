@@ -3,6 +3,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[spanish]{babel} % Changes theorem->teorema, proof->demostración...
+\usepackage{tikz}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%% CONFIGURATION %%%%%%%%%%%%%%%%
@@ -26,15 +27,6 @@
 \author[A. A. Caballero, A. G. Montoro]{Antonio Álvarez Caballero, Alejandro García Montoro}
 \institute[UGR]{Universidad de Granada}
 \date{\today}
-
-% Frame whenever a new section begins
-\AtBeginSection[]{
-    \begin{frame}[plain]
-        \begin{center}
-            \huge{\insertsection}
-        \end{center}
-    \end{frame}
-}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%% COLORS %%%%%%%%%%%%%%%%%%%%
@@ -84,6 +76,38 @@
 
 \setbeamercolor*{block body alerted}{
     parent = palette secondary
+}
+
+\newcommand{\btVFill}{\vskip0pt plus 1filll}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%% TEMPLATES %%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Frame whenever a new section begins
+\AtBeginSection[]{
+    \begin{frame}[plain]
+        \begin{center}
+            \huge{\insertsection}
+        \end{center}
+    \end{frame}
+}
+
+\setbeamertemplate{title page}{
+\begin{frame}
+    \begin{tikzpicture}[remember picture,overlay]
+        \node (title) [shape=rectangle, fill=white, minimum height=20mm, minimum width=\paperwidth, anchor=north west] at ([yshift=-8mm] current page.north west) {};
+        \node at (title.center) {\color{c_metal} \huge \inserttitle};
+
+        \node (subtitle) [shape=rectangle, minimum width=\paperwidth, anchor=west] at ([yshift=5.9cm]current page.south west) {
+			\textsc{\insertsubtitle}
+		};
+    \end{tikzpicture}
+    
+    \begin{center}
+        \insertauthor
+    \end{center}
+\end{frame}
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
