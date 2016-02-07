@@ -300,29 +300,49 @@
                   \item<2-> La perpendicularidad se mantiene si $(Sx)^T (Sy) = 0$
                   \item<3-> La proporción se mantiene si $\frac{(Sx)^T (Sx)}{(Sy)^T (Sy)} - \frac{w^2}{h^2} = 0$
               \end{itemize}
+
+              \uncover<4->{Basta tomar la solución común a las dos cuadráticas anteriores en $a$ y $b$ ---tomando $a$ positiva--- y reconstruir $S$.}
           \end{frame}
 
         \subsubsection{Escalado y traslación}
           \begin{frame}{Transformación de cizalla}{Escalado y traslación}
-              % \begin{exampleblock}{Título de bloque ejemplo}
-              %     Texto en bloque ejemplo
-              % \end{exampleblock}
+              \begin{alertblock}{¿Algoritmo terminado?}
+                  La homografía $S H_r H_p$ rectifica las imágenes cumpliendo los criterios de minimización de la distorsión considerados, ¡pero aún podemos aplicar un escalado y una traslación!
+              \end{alertblock}
 
-              \begin{description}[<+->]
-                  \item [Primer ítem] Descripción 1
-                  \item [Segundo ítem] Descripción 2
-                  \item [Tercer ítem] Descripción 3
-              \end{description}
+              \uncover<2->{
+                  Restricciones a tener en cuenta:
+                  \begin{itemize}
+                      \item<3-> Hay que aplicar un mismo factor de escala a ambas imágenes en ambos ejes.
+                      \item<4-> La traslación vertical tiene que ser igual para ambas imágenes para mantener las líneas epipolares a la misma altura.
+                  \end{itemize}
+                }
           \end{frame}
 
+          \begin{frame}{Transformación de cizalla}{Escalado y traslación}
+              Criterios usados:
+              \begin{itemize}
+                  \item Mantener la suma de las áreas de las imágenes $\Longrightarrow$ Factor de escala $s = \sqrt{\frac{A}{A'}}$, con $A$ la suma de áreas originales y $A'$ la suma de áreas tras proyectar.
+                  \item Aplicar traslación horizontal a cada imagen independientemente para que la mínima coordenada horizontal sea cero.
+                  \item Aplicar traslación vertical común a ambas imágenes para que la mínima coordenada vertical de \emph{las dos} imágenes sea cero.
+              \end{itemize}
+          \end{frame}
 
 
 
     \section{Pruebas y valoración de resultados}
 
       \begin{frame}{Pruebas y valoración de resultados}{Prueba 1}
-
-
+          \begin{overlayarea}{\textwidth}{0}
+              \only<1> {\begin{figure}[ht!]
+                \centering
+                \includegraphics[width=\textwidth]{../Informe/Lola-Normal.png}
+              \end{figure}}
+              \only<2->{\begin{figure}[ht!]
+                  \centering
+                  \includegraphics[width=\textwidth]{../Informe/Lola-Proyectado.png}
+              \end{figure}}
+          \end{overlayarea}
       \end{frame}
 
       \begin{frame}{Pruebas y valoración de resultados}{Prueba 2}
