@@ -36,6 +36,16 @@
     \end{frame}
 }
 
+% Frame whenever a new subsection begins
+\AtBeginSubsection[]{
+    \begin{frame}[plain]
+        \begin{center}
+                \huge{\insertsubsection}
+        \end{center}
+    \end{frame}
+}
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%% COLORS %%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -170,7 +180,7 @@
       \begin{frame}{Transformación proyectiva}{Criterio de minimización}
           El problema se reduce a minimizar la siguiente expresión:
           \begin{equation}
-              \frac{z^TAz}{z^TBz} + \frac{z^TA'z}{z^TB'z}
+              \frac{z^T Az}{z^T Bz} + \frac{z^T A'z}{z^T B'z}
               \label{eq_minz}
           \end{equation}
 
@@ -194,7 +204,7 @@
 
             Para cada sumando:
             \begin{itemize}
-                \item<2-> Descomposición de Cholesky: $A = D^TD$.
+                \item<2-> Descomposición de Cholesky: $A = D^T D$.
                 \item<3-> Encontrar el vector propio $y$ asociado al mayor valor propio de $(D^{-1})^T B D^{-1}$.
                 \item<4-> Tomar $z_i = D^{-1}y$.
             \end{itemize}
@@ -203,45 +213,93 @@
       \subsubsection{Optimización de la raíz con Newton-Raphson}
 
         \begin{frame}{Transformación proyectiva}{Optimización de la raíz con Newton-Raphson}
-            \begin{overlayarea}{\textwidth}{3cm}
-                \only<1> {Lorem ipsum dolor sit amet.}
-                \only<2->{Fusce pretium ullamcorper neque sit amet luctus.}
-            \end{overlayarea}
+
+            \begin{alertblock}{Problema}
+                La anterior aproximación no anula la derivada de \[\frac{z^T Az}{z^T Bz} + \frac{z^T A'z}{z^T B'z}\]
+
+                \uncover<2->{
+                    \begin{center}
+                        ¡No es el mínimo!
+                    \end{center}
+                }
+            \end{alertblock}
+
+            \uncover<3->{\textbf{Solución}: tomar $z$ como primera aproximación y optimizarla con el método de Newton-Raphson.}
+
+            % \begin{overlayarea}{\textwidth}{3cm}
+            %     \only<1> {Lorem ipsum dolor sit amet.}
+            %     \only<2->{Fusce pretium ullamcorper neque sit amet luctus.}
+            % \end{overlayarea}
         \end{frame}
         %--- Next Frame ---%
         \subsubsection{Construcción de la proyección}
 
           \begin{frame}{Transformación proyectiva}{Construcción de la proyección}
-              % \begin{exampleblock}{Título de bloque ejemplo}
-              %     Texto en bloque ejemplo
-              % \end{exampleblock}
+              Una vez calculado $z$, reconstruimos las líneas  $w$ y $w'$:
+              \begin{align*}
+                w &= [e]_\times z\\
+                w' &= Fz
+              \end{align*}
 
-              \begin{description}[<+->]
-                  \item [Primer ítem] Descripción 1
-                  \item [Segundo ítem] Descripción 2
-                  \item [Tercer ítem] Descripción 3
-              \end{description}
+              y reconstruimos las matrices \[H_p =
+              \begin{pmatrix}
+                  1 & 0 & 0 \\
+                  0 & 1 & 0 \\
+                  w_a & w_b & 1
+              \end{pmatrix}\;\;\;\;
+              H'_p =
+              \begin{pmatrix}
+                  1 & 0 & 0 \\
+                  0 & 1 & 0 \\
+                  w'_a & w'_b & 1
+              \end{pmatrix}\]
           \end{frame}
       \subsection{Transformación de semejanza}
 
         \begin{frame}{Transformación de semejanza}
-          Cálculo de semejanza
+            Las matrices $H_r$ y $H'_r$ pueden escribirse como
+            \[
+            H_r = \begin{pmatrix}
+                F_{32} - w_b F_{33} & w_a F_{33} - F_{31} & 0 \\
+                F_{31} - w_a F_{33} & F_{32} - w_b F_{33} & F_{33} + v'_c \\
+                0 & 0 & 1
+            \end{pmatrix}
+            \]
+            \[
+            H'_r = \begin{pmatrix}
+                w'_b F_{33} - F_{23} & F_{13} - w'_a F_{33} & 0 \\
+                w'_a F_{33} - F_{13} & w'_b F_{33} - F_{23} & v'_c \\
+                0 & 0 & 1
+            \end{pmatrix}
+            \]
 
+            \uncover<2->{\large{¡Sólo desconocemos $v'_c$!}} \uncover<3->{$\Longrightarrow$ Basta tomar un valor que  deje la menor coordenada vertical de ambas imágenes igual a cero.}
         \end{frame}
 
       \subsection{Transformación de cizalla}
 
         \subsubsection{Reducción de distorsión}
           \begin{frame}{Transformación de cizalla}{Reducción de distorsión}
-              % \begin{exampleblock}{Título de bloque ejemplo}
-              %     Texto en bloque ejemplo
-              % \end{exampleblock}
+              \begin{alertblock}{Problema}
+                  La distorsión introducida por $H_p$ se puede reducir ---pero no eliminar, ya que $H_p$ es en general una transformación proyectiva--- gracias a la independencia de las líneas $u$ y $u'$.
+              \end{alertblock}
 
-              \begin{description}[<+->]
-                  \item [Primer ítem] Descripción 1
-                  \item [Segundo ítem] Descripción 2
-                  \item [Tercer ítem] Descripción 3
-              \end{description}
+              \begin{alertblock}{Solución}<2->
+                  Intentar mantener la perpendicularidad y la proporción de las líneas que unen los puntos medios de los lados.
+              \end{alertblock}
+          \end{frame}
+
+          \begin{frame}{Transformación de cizalla}{Reducción de distorsión}
+              Si definimos $S = \begin{pmatrix}
+                  a & b & 1\\
+                  0 & 1 & 0\\
+                  0 & 0 & 1
+              \end{pmatrix}$, $x = \hat{b} - \hat{d}$ e $y = \hat{c} - \hat{a}$, donde $\hat{a}$, $\hat{b}$, $\hat{c}$ y $\hat{d}$ son los puntos medios proyectados por $H_r H_p$, entonces:
+
+              \begin{itemize}
+                  \item<2-> La perpendicularidad se mantiene si $(Sx)^T (Sy) = 0$
+                  \item<3-> La proporción se mantiene si $\frac{(Sx)^T (Sx)}{(Sy)^T (Sy)} - \frac{w^2}{h^2} = 0$
+              \end{itemize}
           \end{frame}
 
         \subsubsection{Escalado y traslación}
