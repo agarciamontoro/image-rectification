@@ -12,14 +12,14 @@ using namespace std;
 int main(){
     /****************** EPIPOLAR GEOMETRY **************************/
 
-    // Mat img_1 = imread("img/img1.png");
-    // Mat img_2 = imread("img/img2.png");
+    Mat img_1 = imread("img/img1.png");
+    Mat img_2 = imread("img/img2.png");
 
     // Mat img_1 = imread("img/perra_7.jpg");
     // Mat img_2 = imread("img/perra_8.jpg");
 
-    Mat img_1 = imread("img/madera_1.jpg");
-    Mat img_2 = imread("img/madera_2.jpg");
+    // Mat img_1 = imread("img/madera_1.jpg");
+    // Mat img_2 = imread("img/madera_2.jpg");
 
     Mat fund_mat = Mat::zeros(3,3,CV_64F);
 

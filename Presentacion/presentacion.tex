@@ -1,4 +1,4 @@
-\documentclass[aspectratio=169,14pt,spanish]{beamer}
+\documentclass[14pt,spanish]{beamer}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -180,7 +180,7 @@
       \begin{frame}{Transformación proyectiva}{Criterio de minimización}
           El problema se reduce a minimizar la siguiente expresión:
           \begin{equation}
-              \frac{z^T Az}{z^T Bz} + \frac{z^T A'z}{z^T B'z}
+              f(z) = \frac{z^T Az}{z^T Bz} + \frac{z^T A'z}{z^T B'z}
               \label{eq_minz}
           \end{equation}
 
@@ -215,7 +215,7 @@
         \begin{frame}{Transformación proyectiva}{Optimización de la raíz con Newton-Raphson}
 
             \begin{alertblock}{Problema}
-                La anterior aproximación no anula la derivada de \[\frac{z^T Az}{z^T Bz} + \frac{z^T A'z}{z^T B'z}\]
+                La anterior aproximación no anula la derivada de \[f(z) = \frac{z^T Az}{z^T Bz} + \frac{z^T A'z}{z^T B'z}\]
 
                 \uncover<2->{
                     \begin{center}
@@ -333,38 +333,166 @@
     \section{Pruebas y valoración de resultados}
 
       \begin{frame}{Pruebas y valoración de resultados}{Prueba 1}
-          \begin{overlayarea}{\textwidth}{0}
+          \begin{overlayarea}{\textwidth}{8cm}
               \only<1> {\begin{figure}[ht!]
                 \centering
-                \includegraphics[width=\textwidth]{../Informe/Lola-Normal.png}
-              \end{figure}}
+                \includegraphics[width=0.8\textwidth]{../Informe/Lola-Normal.png}
+              \end{figure}
+
+              \begin{columns}
+                \begin{column}{0.2\textwidth}
+                  \begin{align*}
+                    z &= 0.478684 \\
+                    f'(z) &= 267.276
+                  \end{align*}
+                \end{column}
+                \begin{column}{0.8\textwidth}
+                  Epipolo
+
+                  $[5868.93, -278.987, 1]$
+                \end{column}
+              \end{columns}
+
+
+              }
               \only<2->{\begin{figure}[ht!]
                   \centering
-                  \includegraphics[width=\textwidth]{../Informe/Lola-Proyectado.png}
-              \end{figure}}
+                  \includegraphics[width=0.8\textwidth]{../Informe/Lola-Proyectado.png}
+
+              \end{figure}
+              \begin{columns}
+                \begin{column}{0.2\textwidth}
+                  \begin{align*}
+                    z &= 0.255829 \\
+                    f'(z) &= 0
+                  \end{align*}
+
+                \end{column}
+                \begin{column}{0.8\textwidth}
+                  Epipolo
+
+                  $[0.999998, -0.002162, -1.76364e-05]$
+                \end{column}
+              \end{columns}
+
+              }
+
           \end{overlayarea}
       \end{frame}
 
       \begin{frame}{Pruebas y valoración de resultados}{Prueba 2}
+        \begin{overlayarea}{\textwidth}{8cm}
+            \only<1> {\begin{figure}[ht!]
+              \centering
+              \includegraphics[width=0.8\textwidth]{../Informe/Monigote-Normal.png}
+            \end{figure}
 
+            \begin{columns}
+              \begin{column}{0.2\textwidth}
+                \begin{align*}
+                  z &= -0.0225596 \\
+                  f'(z) &= 110.449
+                \end{align*}
+              \end{column}
+              \begin{column}{0.8\textwidth}
+                Epipolo
+
+                $[-9167.01, -551.777, 1]$
+              \end{column}
+            \end{columns}
+
+
+            }
+            \only<2->{\begin{figure}[ht!]
+                \centering
+                \includegraphics[width=0.8\textwidth]{../Informe/Monigote-Proyectado.png}
+
+            \end{figure}
+            \begin{columns}
+              \begin{column}{0.2\textwidth}
+                \begin{align*}
+                  z &= -0.275237 \\
+                  f'(z) &= 7.10543e-15
+                \end{align*}
+
+              \end{column}
+              \begin{column}{0.8\textwidth}
+                Epipolo
+
+                $[0.9999, -0.0014679, -2.12774e-06]$
+              \end{column}
+            \end{columns}
+
+            }
+
+        \end{overlayarea}
 
       \end{frame}
 
       \begin{frame}{Pruebas y valoración de resultados}{Prueba 3}
 
+        \begin{overlayarea}{\textwidth}{8cm}
+            \only<1> {\begin{figure}[ht!]
+              \centering
+              \includegraphics[width=0.7\textwidth]{../Informe/V-Normal.png}
+            \end{figure}
 
+            \begin{columns}
+              \begin{column}{0.2\textwidth}
+                \begin{align*}
+                  z &= 0.34294 \\
+                  f'(z) &= 10958.3
+                \end{align*}
+              \end{column}
+              \begin{column}{0.8\textwidth}
+                Epipolo
+
+                $[2214.98, 523.468, 1]$
+              \end{column}
+            \end{columns}
+
+
+            }
+            \only<2->{\begin{figure}[ht!]
+                \centering
+                \includegraphics[width=0.7\textwidth]{../Informe/V-Proyectado.png}
+
+            \end{figure}
+            \begin{columns}
+              \begin{column}{0.2\textwidth}
+                \begin{align*}
+                  z &= -0.262589 \\
+                  f'(z) &= 0
+                \end{align*}
+
+              \end{column}
+              \begin{column}{0.8\textwidth}
+                Epipolo
+
+                $[0.999999, 0.00120902, 7.31557e-06]$
+              \end{column}
+            \end{columns}
+
+            }
+
+        \end{overlayarea}
       \end{frame}
 
     \section{Conclusiones}
 
-    \begin{frame}{Conclusiones}{Algo?}
+    \begin{frame}{Conclusiones}
 
-
+      \begin{itemize}
+        \item Problemas de precisión: la descomposición de Cholesky podía fallar debido a que parecía haber valores propios muy pequeños negativos.
+        \item Aunque en el artículo se dice que la primera aproximación de $z$ es cercana a la óptima, el método de \emph{Newton-Raphson} nos dice lo contrario: en algunos casos hay un orden de magnitud de diferencia.
+        \item Las comprobaciones matemáticas de las ecuaciones que definen la minimización de la distorsión prueban la correcta implementación del algoritmo.
+      \end{itemize}
     \end{frame}
 
-    \begin{frame}
-
-      Preguntas?
+    \begin{frame}[plain]
+      \huge{GRACIAS}
+      \vspace{2mm}
+      \hrule
     \end{frame}
 
 \end{document}
