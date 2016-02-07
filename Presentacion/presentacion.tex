@@ -31,7 +31,7 @@
 \AtBeginSection[]{
     \begin{frame}[plain]
         \begin{center}
-            \huge{\insertsection}
+                \huge{\insertsection}
         \end{center}
     \end{frame}
 }
@@ -104,7 +104,7 @@
     \begin{frame}{Descripción del problema}{}
         %\alert{Una alerta}
 
-        \begin{itemize}
+        \begin{itemize}[<+->]
             \item Rectificación: Aplicar homografías a par estéreo para que las líneas
               epipolares queden horizontales y paralelas.
             \item Búsqueda de correspondencias eficiente: Sólo buscamos en una fila
@@ -125,15 +125,21 @@
 
     \begin{frame}{Detalles de la implementación}{}
       Descomposición de las homografías en transformaciones sencillas.
-      Suponiendo que conocemos la geometría epipolar, calculamos:
+      Suponiendo que conocemos la geometría epipolar, calculamos
+      \[
+      H = H_s H_r H_p =
+      \begin{pmatrix}
+          u_a & u_b & u_c \\
+          v_a & v_b & v_c \\
+          w_a & w_b & w_c
+      \end{pmatrix}
+      \]
+
         \begin{enumerate}
-            \item Transformación proyectiva.
-            \item Tranformación de semejanza.
-            \item Transformación de cizalla
+            \item<2-> $H_p$: Transformación proyectiva ---tan afín como sea posible---.
+            \item<3-> $H_r$: Tranformación de semejanza.
+            \item<4-> $H_s$: Transformación de cizalla ---reduce distorsiones---.
         \end{enumerate}
-
-        La homografía final queda $H_s * H_r * H_p$
-
         % \begin{alertblock}{Título de bloque alerta}
         %     Texto en bloque alerta
         % \end{alertblock}
@@ -144,18 +150,54 @@
 
       %Cálculo de transformación proyectiva
 
+      \begin{frame}{Transformación proyectiva}{Criterio de minimización}
+          Un punto $p_i = [p_{i,u}, p_{i,v}, 1]$ se transforma por
+          $
+          H_p =
+          \begin{pmatrix}
+              1 & 0 & 0 \\
+              0 & 1 & 0 \\
+              w_a & w_b & 1
+          \end{pmatrix}
+          $
+          en $[\frac{p_{i,u}}{\omega_i}, \frac{p_{i,v}}{\omega_i}, 1]$, donde los pesos son $\omega_i = [w_a, w_b, 1]p_i$.
+          \\
+          \begin{alertblock}{Criterio de minimización}<2->
+              Si todos los pesos son idénticos, la transformación es afín.
+          \end{alertblock}
+      \end{frame}
+
+      \begin{frame}{Transformación proyectiva}{Criterio de minimización}
+          El problema se reduce a minimizar la siguiente expresión:
+          \begin{equation}
+              \frac{z^TAz}{z^TBz} + \frac{z^TA'z}{z^TB'z}
+              \label{eq_minz}
+          \end{equation}
+
+          donde las matrices $A$, $B$ y sus homólogas con primas son conocidas y el vector $z = [\lambda, 1, 0]$ depende de un único parámetro $\lambda$ y es tal que
+          \begin{align*}
+            w &= [e]_\times z\\
+            w' &= Fz
+          \end{align*}
+      \end{frame}
+
       \subsubsection{Primera aproximación a la raíz}
 
         \begin{frame}{Transformación proyectiva}{Primera aproximación a la raíz}
             % \begin{exampleblock}{Título de bloque ejemplo}
             %     Texto en bloque ejemplo
             % \end{exampleblock}
+            Maximizar por separado el inverso de cada sumando y tomar la media de sus normalizados.
+            \[
+            z = \frac{1}{2}\left(\frac{z_1}{\lVert z_1 \rVert} + \frac{z_2}{\lVert z_2 \rVert}\right)
+            \]
 
-            \begin{description}[<+->]
-                \item [Primer ítem] Descripción 1
-                \item [Segundo ítem] Descripción 2
-                \item [Tercer ítem] Descripción 3
-            \end{description}
+            Para cada sumando:
+            \begin{itemize}
+                \item<2-> Descomposición de Cholesky: $A = D^TD$.
+                \item<3-> Encontrar el vector propio $y$ asociado al mayor valor propio de $(D^{-1})^T B D^{-1}$.
+                \item<4-> Tomar $z_i = D^{-1}y$.
+            \end{itemize}
         \end{frame}
         %--- Next Frame ---%
       \subsubsection{Optimización de la raíz con Newton-Raphson}
