@@ -10,7 +10,7 @@ This in an implementation of the Loop&amp;Zhang image rectification algorithm, d
 
 ## Who has done this?
 
-The algorithm was proposed by Loop&amp;Zhang, while the implementations is done by Antonio Álvarez (@analca3) and Alejandro García (@agarciamontoro).
+The algorithm was proposed by Loop&amp;Zhang, while the implementations is done by Antonio Álvarez ([@analca3](https://github.com/analca3/)) and Alejandro García ([@agarciamontoro](https://github.com/agarciamontoro)).
 
 ## What does this do?
 
