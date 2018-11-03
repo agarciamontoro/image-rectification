@@ -57,9 +57,16 @@ double computeEpiLines(Mat &one, Mat &other, Vec3d &epipole, Mat &fund_mat, vect
      Mat epi_mat;
      SVD::solveZ(fund_mat, epi_mat);
 
+     // It seems that this assignment is outdated
+     // Thanks @Judalucifer from Github
+     //
+     // epipole[0] = epi_mat.at<double>(0,0);
+     // epipole[1] = epi_mat.at<double>(0,1);
+     // epipole[2] = epi_mat.at<double>(0,2);
+
      epipole[0] = epi_mat.at<double>(0,0);
-     epipole[1] = epi_mat.at<double>(0,1);
-     epipole[2] = epi_mat.at<double>(0,2);
+     epipole[1] = epi_mat.at<double>(1,0);
+     epipole[2] = epi_mat.at<double>(2,0);
 
      return (distance_1+distance_2)/(2*lines_1.size());
 }
